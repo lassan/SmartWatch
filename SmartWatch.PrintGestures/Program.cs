@@ -7,8 +7,8 @@ namespace SmartWatch.PrintGestures
     {
         private static void Main(string[] args)
         {
-            IGestures gestures = new Core.ProximitySensors.Gestures();
-            //var gestures = new Core.Mocks.MockGestures();
+            //var gestures = new Core.ProximitySensors.Gestures();
+            var gestures = new Core.Mocks.MockGestures();
             gestures.Pinch += GesturesPinch;
             gestures.ScrollHorizontal += GesturesScrollHorizontal;
             gestures.ScrollVertical += GesturesScrollVertical;

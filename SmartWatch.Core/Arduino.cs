@@ -24,7 +24,9 @@ namespace SmartWatch.Core
         }
 
         /// <summary>
-        ///     Event that is raised when there is data on the serial port from the Arduino
+        ///     Event that is raised when there is data on the serial port from the Arduino.
+        ///     This should probably just invoke the OnDataRecieved method of this class with the serial data to stop this class
+        ///     from depending on any of the consumers
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
