@@ -1,6 +1,5 @@
 ﻿using System;
 using SmartWatch.Core.Gestures;
-using SmartWatch.Core.Mocks;
 
 namespace SmartWatch.PrintGestures
 {
@@ -8,8 +7,8 @@ namespace SmartWatch.PrintGestures
     {
         private static void Main(string[] args)
         {
-            //IGestures gestures = new Gestures();
-            var gestures = new MockGestures();
+            IGestures gestures = new Core.ProximitySensors.Gestures();
+            //var gestures = new Core.Mocks.MockGestures();
             gestures.Pinch += GesturesPinch;
             gestures.ScrollHorizontal += GesturesScrollHorizontal;
             gestures.ScrollVertical += GesturesScrollVertical;

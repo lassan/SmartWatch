@@ -49,7 +49,7 @@
   <ItemGroup>
     <Compile Include="Arduino.cs" />
     <Compile Include="Gestures\GestureParameters.cs" />
-    <Compile Include="Gestures\Gestures.cs" />
+    <Compile Include="ProximitySensors\Gestures.cs" />
     <Compile Include="Gestures\IGestures.cs" />
     <Compile Include="Mocks\MockGestures.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

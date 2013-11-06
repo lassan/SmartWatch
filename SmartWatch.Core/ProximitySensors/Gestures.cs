@@ -1,6 +1,7 @@
 ﻿using System;
+using SmartWatch.Core.Gestures;
 
-namespace SmartWatch.Core.Gestures
+namespace SmartWatch.Core.ProximitySensors
 {
     public class Gestures : IGestures
     {
