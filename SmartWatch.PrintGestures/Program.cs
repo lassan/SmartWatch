@@ -9,12 +9,18 @@ namespace SmartWatch.PrintGestures
         {
             //var gestures = new Core.ProximitySensors.Gestures();
             var gestures = new Core.Mocks.MockGestures();
-            gestures.Pinch += GesturesPinch;
+            gestures.PinchIn += GesturesPinchIn;
+            gestures.PinchOut += GesturesPinchOut;
             gestures.ScrollHorizontal += GesturesScrollHorizontal;
             gestures.ScrollVertical += GesturesScrollVertical;
             gestures.ScrollDiagonal += GesturesScrollDiagonal;
 
             Console.Read();
+        }
+
+        static void GesturesPinchOut(object sender, GestureParameters e)
+        {
+            Console.WriteLine("PinchOut from {0} to {1}", e.From, e.To);
         }
 
         #region Gesture Event Handler
@@ -34,9 +40,9 @@ namespace SmartWatch.PrintGestures
             Console.WriteLine("Horizontal scroll from {0} to {1}", e.From, e.To);
         }
 
-        private static void GesturesPinch(object sender, GestureParameters e)
+        private static void GesturesPinchIn(object sender, GestureParameters e)
         {
-            Console.WriteLine("Pinch from {0} to {1}", e.From, e.To);
+            Console.WriteLine("PinchIn from {0} to {1}", e.From, e.To);
         }
 
         #endregion

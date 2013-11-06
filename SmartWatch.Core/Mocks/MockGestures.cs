@@ -22,7 +22,7 @@ namespace SmartWatch.Core.Mocks
 
         private void timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            var num = _randomNumGenerator.Next(0, 4);
+            var num = _randomNumGenerator.Next(0, 5);
             var from = _randomNumGenerator.Next(0, 255);
             var to = _randomNumGenerator.Next(0, 255);
 
@@ -30,7 +30,7 @@ namespace SmartWatch.Core.Mocks
             switch (num)
             {
                 case 0:
-                    OnPinch(gestureParams);
+                    OnPinchIn(gestureParams);
                     break;
                 case 1:
                     OnScrollHorizontal(gestureParams);
@@ -41,6 +41,9 @@ namespace SmartWatch.Core.Mocks
                 case 3:
                     OnScrollDiagonal(gestureParams);
                     break;
+                case 4:
+                    OnPinchOut(gestureParams);
+                    break;
                 default:
                     throw new ArgumentException("Random number should be restricted to a maximum of 3.");
             }
@@ -48,7 +51,9 @@ namespace SmartWatch.Core.Mocks
 
         #region Events
 
-        public event EventHandler<GestureParameters> Pinch;
+        public event EventHandler<GestureParameters> PinchIn;
+
+        public event EventHandler<GestureParameters> PinchOut;
 
         public event EventHandler<GestureParameters> ScrollHorizontal;
 
@@ -56,9 +61,15 @@ namespace SmartWatch.Core.Mocks
 
         public event EventHandler<GestureParameters> ScrollDiagonal;
 
-        protected virtual void OnPinch(GestureParameters e)
+        protected virtual void OnPinchIn(GestureParameters e)
         {
-            var handler = Pinch;
+            var handler = PinchIn;
+            if (handler != null) handler(this, e);
+        }
+
+        protected virtual void OnPinchOut(GestureParameters e)
+        {
+            var handler = PinchOut;
             if (handler != null) handler(this, e);
         }
 
