@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartWatch.PrintGestures", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartWatch.Core", "SmartWatch.Core\SmartWatch.Core.csproj", "{009A330D-EFFD-409A-B39B-CF339DC220E3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartWatch.Maps", "SmartWatch.Maps\SmartWatch.Maps.csproj", "{B2D61DCB-67E2-48B3-A041-E79604C47729}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{009A330D-EFFD-409A-B39B-CF339DC220E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{009A330D-EFFD-409A-B39B-CF339DC220E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{009A330D-EFFD-409A-B39B-CF339DC220E3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B2D61DCB-67E2-48B3-A041-E79604C47729}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B2D61DCB-67E2-48B3-A041-E79604C47729}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B2D61DCB-67E2-48B3-A041-E79604C47729}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B2D61DCB-67E2-48B3-A041-E79604C47729}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
