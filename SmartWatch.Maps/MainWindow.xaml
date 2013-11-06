@@ -1,0 +1,23 @@
+﻿<Window x:Class="SmartWatch.Maps.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:m="clr-namespace:Microsoft.Maps.MapControl.WPF;assembly=Microsoft.Maps.MapControl.WPF"
+        Title="MainWindow" Height="350" Width="525"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="20"/>
+        </Grid.RowDefinitions>
+        <m:Map Name="MapControl"
+               Grid.Row="0"
+               CredentialsProvider="AvB4YNvPfwD8Ti2on00oxpa38C59e5hNbANFl5SnO5RFp5QqHeASd15ghg1MzKkL"
+               AnimationLevel="Full"/>
+        <StackPanel Grid.Row="1">
+            <TextBlock>
+                <Run Text="Last recieved gesture: " />
+                <Run Text="{Binding LastGesture}" />
+            </TextBlock>
+        </StackPanel>
+    </Grid>
+</Window>
