@@ -1,33 +1,35 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
-using Microsoft.Maps.MapControl.WPF;
+using SmartWatch.Core.Gestures;
 using SmartWatch.Core.Mocks;
 using SmartWatch.Maps.Annotations;
 
 namespace SmartWatch.Maps
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    ///     Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        private string _lastGesture;
+        #region Data Model
 
+        private string _lastGesture;
+        
         public string LastGesture
         {
-            get {
-                return String.IsNullOrEmpty(_lastGesture) 
-                    ? "No gestures detected yet." 
-                    : _lastGesture;
-            }
+            get { return _lastGesture; }
             set
             {
+                if (value == _lastGesture) return;
                 _lastGesture = value;
                 OnPropertyChanged();
             }
         }
+
+        #endregion
+
+        #region Constructor
 
         public MainWindow()
         {
@@ -41,22 +43,26 @@ namespace SmartWatch.Maps
             gestures.ScrollDiagonal += gestures_ScrollDiagonal;
         }
 
-        void gestures_ScrollDiagonal(object sender, Core.Gestures.GestureParameters e)
+        #endregion
+
+        #region Gesture Handlers
+
+        private void gestures_ScrollDiagonal(object sender, GestureParameters e)
         {
             LastGesture = "Scroll Diagonal";
         }
 
-        void gestures_ScrollVertical(object sender, Core.Gestures.GestureParameters e)
+        private void gestures_ScrollVertical(object sender, GestureParameters e)
         {
             LastGesture = "Scroll Vertical";
         }
 
-        void gestures_ScrollHorizontal(object sender, Core.Gestures.GestureParameters e)
+        private void gestures_ScrollHorizontal(object sender, GestureParameters e)
         {
             LastGesture = "Scroll Horizontal";
         }
 
-        void GesturesPinchIn(object sender, Core.Gestures.GestureParameters e)
+        private void GesturesPinchIn(object sender, GestureParameters e)
         {
             LastGesture = "Pinch In";
 
@@ -64,7 +70,7 @@ namespace SmartWatch.Maps
             MapControl.Dispatcher.Invoke(() => ChangeZoomLevel(1));
         }
 
-        void gestures_PinchOut(object sender, Core.Gestures.GestureParameters e)
+        private void gestures_PinchOut(object sender, GestureParameters e)
         {
             LastGesture = "Pinch Out";
 
@@ -72,8 +78,12 @@ namespace SmartWatch.Maps
             MapControl.Dispatcher.Invoke(() => ChangeZoomLevel(-1));
         }
 
+        #endregion
+
+        #region Supporting Methods
+
         /// <summary>
-        /// Changes the zoom level on the map. 
+        ///     Changes the zoom level on the map.
         /// </summary>
         /// <param name="change">Positive value  = zoom in, negative value = zoom out</param>
         private void ChangeZoomLevel(int change)
@@ -82,6 +92,7 @@ namespace SmartWatch.Maps
             MapControl.SetView(MapControl.Center, zoomLevel);
         }
 
+        #endregion
 
         #region INotifyChanged Members
 

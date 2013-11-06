@@ -14,7 +14,7 @@ namespace SmartWatch.Core.Mocks
         public MockGestures()
         {
             _randomNumGenerator = new Random(5000);
-            var timer = new Timer(1000);
+            var timer = new Timer(1500);
             timer.Elapsed += timer_Elapsed;
             timer.AutoReset = true;
             timer.Enabled = true;
