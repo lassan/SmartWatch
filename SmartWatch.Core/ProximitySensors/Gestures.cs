@@ -9,6 +9,7 @@ namespace SmartWatch.Core.ProximitySensors
         {
             var arduino = new Arduino();
             arduino.DataRecieved += arduino_DataRecieved;
+            arduino.OpenConnection();
         }
 
         private void arduino_DataRecieved(object sender, EventArgs e)
@@ -40,7 +41,6 @@ namespace SmartWatch.Core.ProximitySensors
             var handler = PinchOut;
             if (handler != null) handler(this, e);
         }
-
 
         protected virtual void OnScrollHorizontal(GestureParameters e)
         {

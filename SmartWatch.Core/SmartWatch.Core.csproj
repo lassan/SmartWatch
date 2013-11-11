@@ -51,7 +51,7 @@
     <Compile Include="Gestures\GestureParameters.cs" />
     <Compile Include="ProximitySensors\Gestures.cs" />
     <Compile Include="Gestures\IGestures.cs" />
-    <Compile Include="Mocks\MockGestures.cs" />
+    <Compile Include="Mocks\RandomGestures.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

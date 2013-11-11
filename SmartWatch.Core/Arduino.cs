@@ -3,7 +3,7 @@ using System.IO.Ports;
 
 namespace SmartWatch.Core
 {
-    public class Arduino
+    public class Arduino : IDisposable
     {
         #region Data Model
 
@@ -18,9 +18,10 @@ namespace SmartWatch.Core
         public Arduino()
         {
             //TODO - Get correct arduino port, etc
-            _serialPort = new SerialPort("COM3", 9600);
+            _serialPort = new SerialPort("COM3");
+            _serialPort.BaudRate = 9600;
+            _serialPort.Handshake = Handshake.None;
             _serialPort.DataReceived += _serialPort_DataReceived;
-            _serialPort.Open();
         }
 
         /// <summary>
@@ -32,8 +33,20 @@ namespace SmartWatch.Core
         /// <param name="e"></param>
         private void _serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            throw new NotImplementedException();
+            var serialPort = (SerialPort) sender;
+            var data = serialPort.ReadExisting();
         }
+
+        public void OpenConnection()
+        {
+            _serialPort.Open();
+        }
+
+        public void CloseConnection()
+        {
+            _serialPort.Close();
+        }
+
 
         #endregion
 
@@ -45,5 +58,14 @@ namespace SmartWatch.Core
             var handler = DataRecieved;
             if (handler != null) handler(this, EventArgs.Empty);
         }
+
+        #region IDisposable members
+
+        public void Dispose()
+        {
+            _serialPort.Close();
+        }
+
+        #endregion
     }
 }

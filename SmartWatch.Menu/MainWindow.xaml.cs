@@ -13,7 +13,7 @@ namespace SmartWatch.Menu
         public MainWindow()
         {
             InitializeComponent();
-            var gestures = new MockGestures();
+            var gestures = new RandomGestures();
             gestures.ScrollVertical += gestures_ScrollVertical;
             gestures.ScrollHorizontal += gestures_ScrollHorizontal;
         }

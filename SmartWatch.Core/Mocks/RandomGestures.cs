@@ -7,11 +7,11 @@ namespace SmartWatch.Core.Mocks
     /// <summary>
     ///     Mock object that invokes the event for a random gesture every second or so
     /// </summary>
-    public class MockGestures : IGestures
+    public class RandomGestures : IGestures
     {
         private readonly Random _randomNumGenerator;
 
-        public MockGestures()
+        public RandomGestures()
         {
             _randomNumGenerator = new Random(5000);
             var timer = new Timer(1500);
@@ -23,8 +23,8 @@ namespace SmartWatch.Core.Mocks
         private void timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             var num = _randomNumGenerator.Next(0, 5);
-            var x0   = _randomNumGenerator.Next(0, 9);
-            var x1   = _randomNumGenerator.Next(0, 9);
+            var x0 = _randomNumGenerator.Next(0, 9);
+            var x1 = _randomNumGenerator.Next(0, 9);
             var y0 = _randomNumGenerator.Next(0, 9);
             var y1 = _randomNumGenerator.Next(0, 9);
 

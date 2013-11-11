@@ -35,7 +35,7 @@ namespace SmartWatch.Maps
         {
             InitializeComponent();
 
-            var gestures = new MockGestures();
+            var gestures = new RandomGestures();
             gestures.PinchIn += GesturesPinchIn;
             gestures.PinchOut += gestures_PinchOut;
             gestures.ScrollHorizontal += gestures_ScrollHorizontal;
