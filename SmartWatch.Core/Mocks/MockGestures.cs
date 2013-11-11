@@ -23,10 +23,12 @@ namespace SmartWatch.Core.Mocks
         private void timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             var num = _randomNumGenerator.Next(0, 5);
-            var from = _randomNumGenerator.Next(0, 255);
-            var to = _randomNumGenerator.Next(0, 255);
+            var x0   = _randomNumGenerator.Next(0, 9);
+            var x1   = _randomNumGenerator.Next(0, 9);
+            var y0 = _randomNumGenerator.Next(0, 9);
+            var y1 = _randomNumGenerator.Next(0, 9);
 
-            var gestureParams = new GestureParameters(from, to);
+            var gestureParams = new GestureParameters(x0, x1, y0, y1);
             switch (num)
             {
                 case 0:
