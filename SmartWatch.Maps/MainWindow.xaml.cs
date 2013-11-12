@@ -47,22 +47,22 @@ namespace SmartWatch.Maps
 
         #region Gesture Handlers
 
-        private void gestures_ScrollDiagonal(object sender, GestureParameters e)
+        private void gestures_ScrollDiagonal(object sender, ScrollParameters e)
         {
             LastGesture = "Scroll Diagonal";
         }
 
-        private void gestures_ScrollVertical(object sender, GestureParameters e)
+        private void gestures_ScrollVertical(object sender, ScrollParameters e)
         {
             LastGesture = "Scroll Vertical";
         }
 
-        private void gestures_ScrollHorizontal(object sender, GestureParameters e)
+        private void gestures_ScrollHorizontal(object sender, ScrollParameters e)
         {
             LastGesture = "Scroll Horizontal";
         }
 
-        private void GesturesPinchIn(object sender, GestureParameters e)
+        private void GesturesPinchIn(object sender, ScrollParameters e)
         {
             LastGesture = "Pinch In";
 
@@ -70,7 +70,7 @@ namespace SmartWatch.Maps
             MapControl.Dispatcher.Invoke(() => ChangeZoomLevel(1));
         }
 
-        private void gestures_PinchOut(object sender, GestureParameters e)
+        private void gestures_PinchOut(object sender, ScrollParameters e)
         {
             LastGesture = "Pinch Out";
 

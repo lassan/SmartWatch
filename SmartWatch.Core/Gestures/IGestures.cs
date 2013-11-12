@@ -8,10 +8,10 @@ namespace SmartWatch.Core.Gestures
 
         event EventHandler<PinchParameters> PinchOut;
 
-        event EventHandler<GestureParameters> ScrollHorizontal;
+        event EventHandler<ScrollParameters> ScrollHorizontal;
 
-        event EventHandler<GestureParameters> ScrollVertical;
+        event EventHandler<ScrollParameters> ScrollVertical;
 
-        event EventHandler<GestureParameters> ScrollDiagonal;
+        event EventHandler<ScrollParameters> ScrollDiagonal;
     }
 }

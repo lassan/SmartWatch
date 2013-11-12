@@ -28,7 +28,7 @@ namespace SmartWatch.Core.Mocks
             var y0 = _randomNumGenerator.Next(0, 9);
             var y1 = _randomNumGenerator.Next(0, 9);
 
-            var gestureParams = new GestureParameters(x0, x1, y0, y1);
+            var gestureParams = new ScrollParameters(x0, x1, y0, y1);
             switch (num)
             {
                 case 0:
@@ -53,41 +53,41 @@ namespace SmartWatch.Core.Mocks
 
         #region Events
 
-        public event EventHandler<GestureParameters> PinchIn;
+        public event EventHandler<ScrollParameters> PinchIn;
 
-        public event EventHandler<GestureParameters> PinchOut;
+        public event EventHandler<ScrollParameters> PinchOut;
 
-        public event EventHandler<GestureParameters> ScrollHorizontal;
+        public event EventHandler<ScrollParameters> ScrollHorizontal;
 
-        public event EventHandler<GestureParameters> ScrollVertical;
+        public event EventHandler<ScrollParameters> ScrollVertical;
 
-        public event EventHandler<GestureParameters> ScrollDiagonal;
+        public event EventHandler<ScrollParameters> ScrollDiagonal;
 
-        protected virtual void OnPinchIn(GestureParameters e)
+        protected virtual void OnPinchIn(ScrollParameters e)
         {
             var handler = PinchIn;
             if (handler != null) handler(this, e);
         }
 
-        protected virtual void OnPinchOut(GestureParameters e)
+        protected virtual void OnPinchOut(ScrollParameters e)
         {
             var handler = PinchOut;
             if (handler != null) handler(this, e);
         }
 
-        protected virtual void OnScrollHorizontal(GestureParameters e)
+        protected virtual void OnScrollHorizontal(ScrollParameters e)
         {
             var handler = ScrollHorizontal;
             if (handler != null) handler(this, e);
         }
 
-        protected virtual void OnScrollVertical(GestureParameters e)
+        protected virtual void OnScrollVertical(ScrollParameters e)
         {
             var handler = ScrollVertical;
             if (handler != null) handler(this, e);
         }
 
-        protected virtual void OnScrollDiagonal(GestureParameters e)
+        protected virtual void OnScrollDiagonal(ScrollParameters e)
         {
             var handler = ScrollDiagonal;
             if (handler != null) handler(this, e);

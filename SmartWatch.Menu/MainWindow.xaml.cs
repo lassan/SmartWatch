@@ -18,7 +18,7 @@ namespace SmartWatch.Menu
             gestures.ScrollHorizontal += gestures_ScrollHorizontal;
         }
 
-        private void gestures_ScrollHorizontal(object sender, GestureParameters e)
+        private void gestures_ScrollHorizontal(object sender, ScrollParameters e)
         {
             var shouldScrollLeft = (ScrollViewerControl.ScrollableWidth > 0) &&
                                    (ScrollViewerControl.HorizontalOffset > 0);
@@ -51,7 +51,7 @@ namespace SmartWatch.Menu
             Thread.Sleep(10);
         }
 
-        private void gestures_ScrollVertical(object sender, GestureParameters e)
+        private void gestures_ScrollVertical(object sender, ScrollParameters e)
         {
             var shouldScrollUp = (ScrollViewerControl.ScrollableHeight > 0) && (ScrollViewerControl.VerticalOffset > 0);
 

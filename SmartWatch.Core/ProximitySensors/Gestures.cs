@@ -24,11 +24,11 @@ namespace SmartWatch.Core.ProximitySensors
 
         public event EventHandler<PinchParameters> PinchOut;
 
-        public event EventHandler<GestureParameters> ScrollHorizontal;
+        public event EventHandler<ScrollParameters> ScrollHorizontal;
 
-        public event EventHandler<GestureParameters> ScrollVertical;
+        public event EventHandler<ScrollParameters> ScrollVertical;
 
-        public event EventHandler<GestureParameters> ScrollDiagonal;
+        public event EventHandler<ScrollParameters> ScrollDiagonal;
 
         protected virtual void OnPinchIn(PinchParameters e)
         {
@@ -42,19 +42,19 @@ namespace SmartWatch.Core.ProximitySensors
             if (handler != null) handler(this, e);
         }
 
-        protected virtual void OnScrollHorizontal(GestureParameters e)
+        protected virtual void OnScrollHorizontal(ScrollParameters e)
         {
             var handler = ScrollHorizontal;
             if (handler != null) handler(this, e);
         }
 
-        protected virtual void OnScrollVertical(GestureParameters e)
+        protected virtual void OnScrollVertical(ScrollParameters e)
         {
             var handler = ScrollVertical;
             if (handler != null) handler(this, e);
         }
 
-        protected virtual void OnScrollDiagonal(GestureParameters e)
+        protected virtual void OnScrollDiagonal(ScrollParameters e)
         {
             var handler = ScrollDiagonal;
             if (handler != null) handler(this, e);

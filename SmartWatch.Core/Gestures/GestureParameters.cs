@@ -3,9 +3,9 @@
     /// <summary>
     ///     TODO Perhaps it makes more sense to have a discrete set of parameters
     /// </summary>
-    public class GestureParameters
+    public class ScrollParameters
     {
-        public GestureParameters(Point startPoint, Point endPoint)
+        public ScrollParameters(Point startPoint, Point endPoint)
         {
             StartPoint = startPoint;
             EndPoint = endPoint;
