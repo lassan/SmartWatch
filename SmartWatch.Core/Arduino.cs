@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO.Ports;
 
 namespace SmartWatch.Core
@@ -20,7 +21,7 @@ namespace SmartWatch.Core
         public Arduino()
         {
             //TODO - Get correct arduino port, etc
-            _serialPort = new SerialPort("COM3");
+            _serialPort = new SerialPort("COM4");
             _serialPort.BaudRate = 9600;
             _serialPort.Handshake = Handshake.None;
             _serialPort.DataReceived += _serialPort_DataReceived;
@@ -29,14 +30,28 @@ namespace SmartWatch.Core
         /// <summary>
         ///     Event that is raised when there is data on the serial port from the Arduino.
         ///     This should probably just invoke the OnDataRecieved method of this class with the serial data to stop this class
-        ///     from depending on any of the consumers
+        ///     from depending on any of the consumers 
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void _serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             var serialPort = (SerialPort) sender;
-            var data = serialPort.ReadExisting();
+            var data = serialPort.ReadLine();
+            var array = data.Split('|');
+            int proximity;
+            if (Int32.TryParse(array[1], out proximity))
+            {
+                if (proximity < 2000)
+                    proximity = 2000;
+                else if (proximity > 4000)
+                    proximity = 4000;
+                
+                proximity = proximity/20 - 100;
+                OnDataRecieved(proximity);
+                Debug.WriteLine(proximity);
+            } else
+                Debug.WriteLine("Proximity conversion to int failed.");
         }
 
         public void OpenConnection()
