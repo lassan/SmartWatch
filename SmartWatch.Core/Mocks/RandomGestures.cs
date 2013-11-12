@@ -22,40 +22,40 @@ namespace SmartWatch.Core.Mocks
 
         private void timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            var num = _randomNumGenerator.Next(0, 5);
-            var x0 = _randomNumGenerator.Next(0, 9);
-            var x1 = _randomNumGenerator.Next(0, 9);
-            var y0 = _randomNumGenerator.Next(0, 9);
-            var y1 = _randomNumGenerator.Next(0, 9);
+            //var num = _randomNumGenerator.Next(0, 5);
+            //var x0 = _randomNumGenerator.Next(0, 9);
+            //var x1 = _randomNumGenerator.Next(0, 9);
+            //var y0 = _randomNumGenerator.Next(0, 9);
+            //var y1 = _randomNumGenerator.Next(0, 9);
 
-            var gestureParams = new ScrollParameters(x0, x1, y0, y1);
-            switch (num)
-            {
-                case 0:
-                    OnPinchIn(gestureParams);
-                    break;
-                case 1:
-                    OnScrollHorizontal(gestureParams);
-                    break;
-                case 2:
-                    OnScrollVertical(gestureParams);
-                    break;
-                case 3:
-                    OnScrollDiagonal(gestureParams);
-                    break;
-                case 4:
-                    OnPinchOut(gestureParams);
-                    break;
-                default:
-                    throw new ArgumentException("Random number should be restricted to a maximum of 3.");
-            }
+            //var gestureParams = new ScrollParameters(x0, x1, y0, y1);
+            //switch (num)
+            //{
+            //    case 0:
+            //        OnPinchIn(gestureParams);
+            //        break;
+            //    case 1:
+            //        OnScrollHorizontal(gestureParams);
+            //        break;
+            //    case 2:
+            //        OnScrollVertical(gestureParams);
+            //        break;
+            //    case 3:
+            //        OnScrollDiagonal(gestureParams);
+            //        break;
+            //    case 4:
+            //        OnPinchOut(gestureParams);
+            //        break;
+            //    default:
+            //        throw new ArgumentException("Random number should be restricted to a maximum of 3.");
+            //}
         }
 
         #region Events
 
-        public event EventHandler<ScrollParameters> PinchIn;
+        public event EventHandler<PinchParameters> PinchIn;
 
-        public event EventHandler<ScrollParameters> PinchOut;
+        public event EventHandler<PinchParameters> PinchOut;
 
         public event EventHandler<ScrollParameters> ScrollHorizontal;
 
@@ -63,13 +63,13 @@ namespace SmartWatch.Core.Mocks
 
         public event EventHandler<ScrollParameters> ScrollDiagonal;
 
-        protected virtual void OnPinchIn(ScrollParameters e)
+        protected virtual void OnPinchIn(PinchParameters e)
         {
             var handler = PinchIn;
             if (handler != null) handler(this, e);
         }
 
-        protected virtual void OnPinchOut(ScrollParameters e)
+        protected virtual void OnPinchOut(PinchParameters e)
         {
             var handler = PinchOut;
             if (handler != null) handler(this, e);

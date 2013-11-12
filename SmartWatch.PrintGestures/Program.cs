@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using SmartWatch.Core.Gestures;
 using SmartWatch.Core.Mocks;
 
@@ -21,31 +22,53 @@ namespace SmartWatch.PrintGestures
 
         #region Gesture Event Handler
 
-        private static void GesturesPinchOut(object sender, ScrollParameters e)
+        private static void GesturesPinchOut(object sender, PinchParameters e)
         {
-            Console.WriteLine("PinchOut:\t\t x0: {0} \t x1: {1} \t y0: {2} \t y1: {3}", e.X0, e.X1, e.Y0, e.Y1);
+            Console.WriteLine(PinchStringBuilder(e, "Pinch Out"));
         }
 
         private static void GesturesScrollVertical(object sender, ScrollParameters e)
         {
-            Console.WriteLine("Vertical Scroll:\t x0: {0} \t x1: {1} \t y0: {2} \t y1: {3}", e.X0, e.X1, e.Y0, e.Y1);
+            Console.WriteLine(GetScrollDisplayString(e, "Vertical Scroll"));
         }
 
         private static void GesturesScrollDiagonal(object sender, ScrollParameters e)
         {
-            Console.WriteLine("Diagonal Scroll:\t x0: {0} \t x1: {1} \t y0: {2} \t y1: {3}", e.X0, e.X1, e.Y0, e.Y1);
+            Console.WriteLine(GetScrollDisplayString(e, "Diagonal Scroll"));
         }
 
         private static void GesturesScrollHorizontal(object sender, ScrollParameters e)
         {
-            Console.WriteLine("Horizontal Scroll:\t x0: {0} \t x1: {1} \t y0: {2} \t y1: {3}", e.X0, e.X1, e.Y0, e.Y1);
+            Console.WriteLine(GetScrollDisplayString(e, "Horizontal Scroll"));
         }
 
-        private static void GesturesPinchIn(object sender, ScrollParameters e)
+        private static void GesturesPinchIn(object sender, PinchParameters e)
         {
-            Console.WriteLine("PinchIn:\t\t x0: {0} \t x1: {1} \t y0: {2} \t y1: {3}", e.X0, e.X1, e.Y0, e.Y1);
+            Console.WriteLine(PinchStringBuilder(e, "Pinch In"));
         }
 
         #endregion
+
+        private static string PinchStringBuilder(PinchParameters e, string heading)
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine(heading);
+            stringBuilder.AppendFormat("Start: [{0} {1} ; {2} {3}]",
+                e.StartPoint0.x, e.StartPoint0.y,
+                e.StartPoint1.x, e.StartPoint1.y);
+            stringBuilder.AppendFormat("End: [{0} {1}; {2} {3}]",
+                e.EndPoint0.x, e.EndPoint0.y, e.EndPoint1.x,
+                e.EndPoint1.y);
+            return stringBuilder.ToString();
+        }
+
+        private static string GetScrollDisplayString(ScrollParameters e, string heading)
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.Append(heading);
+            stringBuilder.AppendFormat("Start: [{0} {1}]", e.StartPoint.x, e.StartPoint.y);
+            stringBuilder.AppendFormat("End: [{0} {1}]", e.EndPoint.x, e.EndPoint.y);
+            return stringBuilder.ToString();
+        }
     }
 }
