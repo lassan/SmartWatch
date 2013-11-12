@@ -4,9 +4,9 @@ namespace SmartWatch.Core.Gestures
 {
     public interface IGestures
     {
-        event EventHandler<GestureParameters> PinchIn;
+        event EventHandler<PinchParameters> PinchIn;
 
-        event EventHandler<GestureParameters> PinchOut;
+        event EventHandler<PinchParameters> PinchOut;
 
         event EventHandler<GestureParameters> ScrollHorizontal;
 

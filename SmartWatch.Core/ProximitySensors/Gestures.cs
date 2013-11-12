@@ -12,17 +12,17 @@ namespace SmartWatch.Core.ProximitySensors
             arduino.OpenConnection();
         }
 
-        private void arduino_DataRecieved(object sender, EventArgs e)
+        void arduino_DataRecieved(object sender, int e)
         {
-            //Decide what that data means and what the gesture is, then raise the appropriate event
             throw new NotImplementedException();
         }
 
+
         #region Events
 
-        public event EventHandler<GestureParameters> PinchIn;
+        public event EventHandler<PinchParameters> PinchIn;
 
-        public event EventHandler<GestureParameters> PinchOut;
+        public event EventHandler<PinchParameters> PinchOut;
 
         public event EventHandler<GestureParameters> ScrollHorizontal;
 
@@ -30,13 +30,13 @@ namespace SmartWatch.Core.ProximitySensors
 
         public event EventHandler<GestureParameters> ScrollDiagonal;
 
-        protected virtual void OnPinchIn(GestureParameters e)
+        protected virtual void OnPinchIn(PinchParameters e)
         {
             var handler = PinchIn;
             if (handler != null) handler(this, e);
         }
 
-        protected virtual void OnPinchOut(GestureParameters e)
+        protected virtual void OnPinchOut(PinchParameters e)
         {
             var handler = PinchOut;
             if (handler != null) handler(this, e);

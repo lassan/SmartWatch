@@ -1,93 +1,45 @@
-﻿using System;
-
-namespace SmartWatch.Core.Gestures
+﻿namespace SmartWatch.Core.Gestures
 {
     /// <summary>
     ///     TODO Perhaps it makes more sense to have a discrete set of parameters
     /// </summary>
     public class GestureParameters
     {
-        #region Backing Fields
-
-        private int _x0;
-        private int _x1;
-        private int _y0;
-        private int _y1;
-
-        #endregion
-
-        #region Constructor
-
-        public GestureParameters(int x0, int x1, int y0, int y1)
+        public GestureParameters(Point startPoint, Point endPoint)
         {
-            //TODO - Do some validation 
-
-            Y1 = y1;
-            Y0 = y0;
-            X1 = x1;
-            X0 = x0;
+            StartPoint = startPoint;
+            EndPoint = endPoint;
         }
 
-        #endregion
+        public Point StartPoint { get; private set; }
+        public Point EndPoint { get; private set; }
+    }
 
-        #region Data Model
-
-        public int X0
+    public class PinchParameters
+    {
+        public PinchParameters(Point startPoint0, Point startPoint1, Point endPoint0, Point endPoint1)
         {
-            get { return _x0; }
-            private set
-            {
-                ValidateXCoordinate(value);
-                _x0 = value;
-            }
+            StartPoint0 = startPoint0;
+            StartPoint1 = startPoint1;
+            EndPoint0 = endPoint0;
+            EndPoint1 = endPoint1;
         }
 
-        public int X1
+        public Point StartPoint0 { get; private set; }
+        public Point StartPoint1 { get; private set; }
+        public Point EndPoint0 { get; private set; }
+        public Point EndPoint1 { get; private set; }
+    }
+
+    public struct Point
+    {
+        public int x;
+        public int y;
+
+        public Point(int xIn, int yIn)
         {
-            get { return _x1; }
-            private set
-            {
-                ValidateXCoordinate(value);
-                _x1 = value;
-            }
+            x = xIn;
+            y = yIn;
         }
-
-        public int Y0
-        {
-            get { return _y0; }
-            private set
-            {
-                ValidateYCoordinate(value);
-                _y0 = value;
-            }
-        }
-
-        public int Y1
-        {
-            get { return _y1; }
-            private set
-            {
-                ValidateYCoordinate(value);
-                _y1 = value;
-            }
-        }
-
-        #endregion
-
-        #region Validation Methods
-
-        private void ValidateXCoordinate(int value)
-        {
-            if (value < 0 || value > 10)
-                throw new ArgumentOutOfRangeException();
-        }
-
-        public void ValidateYCoordinate(int value)
-        {
-            if (value < 0 || value > 10)
-                throw new ArgumentOutOfRangeException();
-        }
-
-        #endregion
     }
 }

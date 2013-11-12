@@ -9,7 +9,9 @@ namespace SmartWatch.Core
 
         private readonly SerialPort _serialPort;
 
-        public event EventHandler DataRecieved;
+        public event EventHandler<int> DataRecieved;
+
+       
 
         #endregion
 
@@ -53,11 +55,12 @@ namespace SmartWatch.Core
         /// <summary>
         ///     Event that is invoked when there is data that should be used by any one else is ready
         /// </summary>
-        protected virtual void OnDataRecieved()
+        protected virtual void OnDataRecieved(int e)
         {
             var handler = DataRecieved;
-            if (handler != null) handler(this, EventArgs.Empty);
+            if (handler != null) handler(this, e);
         }
+     
 
         #region IDisposable members
 
