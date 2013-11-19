@@ -45,10 +45,15 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WobbrockLib, Version=2.7.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Downloads\$1\bin\Release\WobbrockLib.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Arduino.cs" />
     <Compile Include="Gestures\GestureParameters.cs" />
+    <Compile Include="IArduino.cs" />
     <Compile Include="Mocks\ArduinoMock.cs" />
     <Compile Include="ProximitySensors\GestureRecognition.cs" />
     <Compile Include="Gestures\IGestures.cs" />

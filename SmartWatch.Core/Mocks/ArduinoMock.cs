@@ -5,56 +5,82 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using WobbrockLib;
+using WobbrockLib.Extensions; 
 using Timer = System.Timers.Timer;
 
 namespace SmartWatch.Core.Mocks
 {
-    public class ArduinoMock
+    public class ArduinoMock : IArduino, IDisposable
     {
-        private readonly Random _randomNumGenerator;
+        private bool _isEnabled;
 
         public ArduinoMock()
         {
-            _randomNumGenerator = new Random(500);
-
-            Task.Run(()=>GenerateIncrementingNumbers());
-
-            //var timer = new Timer(100);
-            //timer.Elapsed += timer_Elapsed;
-            //timer.AutoReset = true;
-            //timer.Enabled = true;
+            Task.Run(()=>GenerateTestData());
         }
 
-        public void GenerateIncrementingNumbers()
+        public void GenerateTestData()
         {
-            int[] num = new int[] {5, 1, 2, 5, 6, 3, 1 , 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+            var list = new List<TimePointF>();
 
-            foreach (int item in num)
-            //while (true)
+            var l = 30;
+
+            for (var i = 0; i < l; i++)
+            {
+                if (i == 5 || i == 15)
+                    OnTapped(true);
+
+                TimePointF tpf = new TimePointF(i, 1, 10);
+                list.Add(tpf);
+            }
+
+            foreach (var item in list)
             {
                 OnDataRecieved(item);
-                //num = 2* num;
                 Thread.Sleep(100);
             }
         }
 
-        public event EventHandler<int> DataRecieved;
+        #region IArduino Members
 
-        protected virtual void OnDataRecieved(int e)
+        public event EventHandler<TimePointF> DataRecieved;
+
+        public event EventHandler<bool> TapRecieved;
+
+        public bool IsEnabled
+        {
+            get { return _isEnabled; }
+            set { _isEnabled = value; }
+        }
+
+        public void Connect()
+        {
+        }
+
+        #endregion
+
+        #region Event Invokers
+
+        protected virtual void OnDataRecieved(TimePointF e)
         {
             var handler = DataRecieved;
             if (handler != null) handler(this, e);
         }
 
-        private void timer_Elapsed(object sender, ElapsedEventArgs e)
+        protected virtual void OnTapped(bool e)
         {
-            var num = _randomNumGenerator.Next(0, 500);
-            OnDataRecieved(num);
-
+            var handler = TapRecieved;
+            if (handler != null) handler(this, e);
         }
 
-        public void OpenConnection()
-        {
-        }
+        #endregion
+
+        #region IDisposable Members
+
+        public void Dispose() { }
+
+        #endregion
+
     }
 }
