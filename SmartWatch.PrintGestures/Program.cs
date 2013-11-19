@@ -9,8 +9,8 @@ namespace SmartWatch.PrintGestures
     {
         private static void Main(string[] args)
         {
-            //var gestures = new Core.ProximitySensors.GestureRecognition();
-            var gestures = new RandomGestures();
+            var gestures = new Core.ProximitySensors.GestureRecognition();
+            //var gestures = new RandomGestures();
             gestures.PinchIn += GesturesPinchIn;
             gestures.PinchOut += GesturesPinchOut;
             gestures.ScrollHorizontal += GesturesScrollHorizontal;
