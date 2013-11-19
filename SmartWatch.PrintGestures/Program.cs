@@ -9,8 +9,8 @@ namespace SmartWatch.PrintGestures
     {
         private static void Main(string[] args)
         {
-            var gestures = new Core.ProximitySensors.Gestures();
-            //var gestures = new RandomGestures();
+            //var gestures = new Core.ProximitySensors.GestureRecognition();
+            var gestures = new RandomGestures();
             gestures.PinchIn += GesturesPinchIn;
             gestures.PinchOut += GesturesPinchOut;
             gestures.ScrollHorizontal += GesturesScrollHorizontal;
@@ -52,11 +52,11 @@ namespace SmartWatch.PrintGestures
         private static string PinchStringBuilder(PinchParameters e, string heading)
         {
             var stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine(heading);
-            stringBuilder.AppendFormat("Start: [{0} {1} ; {2} {3}]",
+            stringBuilder.Append(heading);
+            stringBuilder.AppendFormat("\tStart: [{0} {1} ; {2} {3}]",
                 e.StartPoint0.x, e.StartPoint0.y,
                 e.StartPoint1.x, e.StartPoint1.y);
-            stringBuilder.AppendFormat("End: [{0} {1}; {2} {3}]",
+            stringBuilder.AppendFormat("\tEnd: [{0} {1}; {2} {3}]",
                 e.EndPoint0.x, e.EndPoint0.y, e.EndPoint1.x,
                 e.EndPoint1.y);
             return stringBuilder.ToString();
@@ -66,8 +66,8 @@ namespace SmartWatch.PrintGestures
         {
             var stringBuilder = new StringBuilder();
             stringBuilder.Append(heading);
-            stringBuilder.AppendFormat("Start: [{0} {1}]", e.StartPoint.x, e.StartPoint.y);
-            stringBuilder.AppendFormat("End: [{0} {1}]", e.EndPoint.x, e.EndPoint.y);
+            stringBuilder.AppendFormat("\tStart: [{0} {1}]", e.StartPoint.x, e.StartPoint.y);
+            stringBuilder.AppendFormat("\tEnd: [{0} {1}]", e.EndPoint.x, e.EndPoint.y);
             return stringBuilder.ToString();
         }
     }

@@ -22,33 +22,40 @@ namespace SmartWatch.Core.Mocks
 
         private void timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            //var num = _randomNumGenerator.Next(0, 5);
-            //var x0 = _randomNumGenerator.Next(0, 9);
-            //var x1 = _randomNumGenerator.Next(0, 9);
-            //var y0 = _randomNumGenerator.Next(0, 9);
-            //var y1 = _randomNumGenerator.Next(0, 9);
+            var num = _randomNumGenerator.Next(0, 5);
+            var x00 = _randomNumGenerator.Next(0, 9);
+            var x01 = _randomNumGenerator.Next(0, 9);
+            var y00 = _randomNumGenerator.Next(0, 9);
+            var y01 = _randomNumGenerator.Next(0, 9);
+            var x10 = _randomNumGenerator.Next(0, 9);
+            var x11 = _randomNumGenerator.Next(0, 9);
+            var y10 = _randomNumGenerator.Next(0, 9);
+            var y11 = _randomNumGenerator.Next(0, 9);
 
-            //var gestureParams = new ScrollParameters(x0, x1, y0, y1);
-            //switch (num)
-            //{
-            //    case 0:
-            //        OnPinchIn(gestureParams);
-            //        break;
-            //    case 1:
-            //        OnScrollHorizontal(gestureParams);
-            //        break;
-            //    case 2:
-            //        OnScrollVertical(gestureParams);
-            //        break;
-            //    case 3:
-            //        OnScrollDiagonal(gestureParams);
-            //        break;
-            //    case 4:
-            //        OnPinchOut(gestureParams);
-            //        break;
-            //    default:
-            //        throw new ArgumentException("Random number should be restricted to a maximum of 3.");
-            //}
+            var scrollParams = new ScrollParameters(new Point(x00, y00), new Point(x01, y01) );
+            var pinchParams = new PinchParameters(new Point(x00, y00), new Point(x01, y01), new Point(x10, y10),
+                new Point(x11, y11));
+
+            switch (num)
+            {
+                case 0:
+                    OnPinchIn(pinchParams);
+                    break;
+                case 1:
+                    OnScrollHorizontal(scrollParams);
+                    break;
+                case 2:
+                    OnScrollVertical(scrollParams);
+                    break;
+                case 3:
+                    OnScrollDiagonal(scrollParams);
+                    break;
+                case 4:
+                    OnPinchOut(pinchParams);
+                    break;
+                default:
+                    throw new ArgumentException("Random number should be restricted to a maximum of 3.");
+            }
         }
 
         #region Events

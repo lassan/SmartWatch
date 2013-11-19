@@ -8,11 +8,11 @@ using SmartWatch.Core.Mocks;
 
 namespace SmartWatch.Core.ProximitySensors
 {
-    public class Gestures : IGestures
+    public class GestureRecognition : IGestures
     {
         List<int> list = new List<int>();
 
-        public Gestures()
+        public GestureRecognition()
         {
             //var arduino = new Arduino();
             var arduino = new ArduinoMock();
