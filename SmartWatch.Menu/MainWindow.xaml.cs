@@ -65,7 +65,6 @@ namespace SmartWatch.Menu
                 {
                     ScrollVertically(-10);
                 }
-
             }
             else if (shouldScrollDown)
             {

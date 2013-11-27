@@ -11,7 +11,6 @@ namespace SmartWatch.Core
 
         private readonly SerialPort _serialPort;
         private int _time;
-        private bool _isEnabled;
 
         #endregion
 
@@ -19,7 +18,7 @@ namespace SmartWatch.Core
 
         public Arduino()
         {
-            _serialPort = new SerialPort("COM4");
+            _serialPort = new SerialPort("COM3");
             _serialPort.BaudRate = 9600;
             _serialPort.Handshake = Handshake.None;
             _serialPort.DataReceived += _serialPort_DataReceived;
@@ -34,17 +33,17 @@ namespace SmartWatch.Core
         /// <param name="e"></param>
         private void _serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            var serialPort = (SerialPort)sender;
+            var serialPort = (SerialPort) sender;
             var data = serialPort.ReadLine();
             var array = data.Split('|');
             var tapped = Int32.Parse(array[0]);
             var ambient1 = Int32.Parse(array[1]);
             var proximity1 = Int32.Parse(array[2]);
-            var ambient2 = Int32.Parse(array[3]);
-            var proximity2 = Int32.Parse(array[4]);
-            var ambient3 = Int32.Parse(array[5]);
-            var proximity3 = Int32.Parse(array[6]);
-            var tappedVal = Int32.Parse(array[7]);
+            //var ambient2 = Int32.Parse(array[3]);
+            //var proximity2 = Int32.Parse(array[4]);
+            //var ambient3 = Int32.Parse(array[5]);
+            //var proximity3 = Int32.Parse(array[6]);
+            //var tappedVal = Int32.Parse(array[7]);
 
             //if (tapped == 1)
             //{
@@ -52,23 +51,27 @@ namespace SmartWatch.Core
             //    _time = 1;
             //}
 
+            //Debug.Write("Proximity1 recieved: " + proximity1);
+
+
             proximity1 = MapProximity(proximity1);
-            proximity2 = MapProximity(proximity2);
-            proximity3 = MapProximity(proximity3);
+            //proximity2 = MapProximity(proximity2);
+            //proximity3 = MapProximity(proximity3);
 
+            //Debug.WriteLine("\t After mapping: " + proximity1);
 
-            if (IsEnabled == false && proximity1 > 20 && proximity1 < 80)
+            if (IsEnabled == false && proximity1 > 55 && proximity1 < 150)
             {
                 OnTapped(true);
                 IsEnabled = true;
                 _time = 1;
             }
 
-            var tpf1 = new TimePointF(proximity1, 5 * 2, _time * 10);
+            var tpf1 = new TimePointF(proximity1, 100, _time*10);
 
-            var tpf2 = new TimePointF(proximity2, 5 * 3, _time * 10);
+            //var tpf2 = new TimePointF(proximity2, 5*3, _time*10);
 
-            var tpf3 = new TimePointF(proximity3, 5 * 4, _time * 10);
+            //var tpf3 = new TimePointF(proximity3, 5*4, _time*10);
 
             _time = _time + 1;
 
@@ -82,7 +85,7 @@ namespace SmartWatch.Core
             else if (val > 5000)
                 val = 5000;
 
-            return val / 20 - 100;
+            return val/20 - 100;
         }
 
         #region IArudino Members
@@ -91,10 +94,7 @@ namespace SmartWatch.Core
 
         public event EventHandler<bool> TapRecieved;
 
-        public bool IsEnabled {
-            get { return _isEnabled; }
-            set { _isEnabled = value; }
-        }
+        public bool IsEnabled { get; set; }
 
         public void Connect()
         {

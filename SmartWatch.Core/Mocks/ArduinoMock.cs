@@ -1,23 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using WobbrockLib;
-using WobbrockLib.Extensions; 
-using Timer = System.Timers.Timer;
 
 namespace SmartWatch.Core.Mocks
 {
     public class ArduinoMock : IArduino, IDisposable
     {
-        private bool _isEnabled;
-
         public ArduinoMock()
         {
-            Task.Run(()=>GenerateTestData());
+            Task.Run(() => GenerateTestData());
         }
 
         public void GenerateTestData()
@@ -31,7 +24,7 @@ namespace SmartWatch.Core.Mocks
                 if (i == 5 || i == 15)
                     OnTapped(true);
 
-                TimePointF tpf = new TimePointF(i, 1, 10);
+                var tpf = new TimePointF(i, 1, 10);
                 list.Add(tpf);
             }
 
@@ -48,11 +41,7 @@ namespace SmartWatch.Core.Mocks
 
         public event EventHandler<bool> TapRecieved;
 
-        public bool IsEnabled
-        {
-            get { return _isEnabled; }
-            set { _isEnabled = value; }
-        }
+        public bool IsEnabled { get; set; }
 
         public void Connect()
         {
@@ -78,9 +67,10 @@ namespace SmartWatch.Core.Mocks
 
         #region IDisposable Members
 
-        public void Dispose() { }
+        public void Dispose()
+        {
+        }
 
         #endregion
-
     }
 }

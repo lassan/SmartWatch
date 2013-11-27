@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WobbrockLib;
 
 namespace SmartWatch.Core
 {
-    interface IArduino
+    internal interface IArduino
     {
-        bool IsEnabled {get; set;}
+        bool IsEnabled { get; set; }
 
         void Connect();
 

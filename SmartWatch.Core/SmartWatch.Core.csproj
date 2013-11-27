@@ -40,14 +40,9 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
     <Reference Include="WobbrockLib, Version=2.7.4.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Downloads\$1\bin\Release\WobbrockLib.dll</HintPath>
+      <HintPath>..\Recognizer\bin\Debug\WobbrockLib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
