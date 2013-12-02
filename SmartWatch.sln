@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartWatch.Menu", "SmartWat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recognizer", "Recognizer\Recognizer.csproj", "{10EB124D-D00A-472D-A0C6-075EE521B9BB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartWatch.Training", "SmartWatch.Training\SmartWatch.Training.csproj", "{4D9F6C5D-DB79-4D47-9AE2-BA10891571F7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{10EB124D-D00A-472D-A0C6-075EE521B9BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10EB124D-D00A-472D-A0C6-075EE521B9BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10EB124D-D00A-472D-A0C6-075EE521B9BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D9F6C5D-DB79-4D47-9AE2-BA10891571F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D9F6C5D-DB79-4D47-9AE2-BA10891571F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D9F6C5D-DB79-4D47-9AE2-BA10891571F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D9F6C5D-DB79-4D47-9AE2-BA10891571F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
