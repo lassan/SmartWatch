@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using SmartWatch.Core.Gestures;
 using SmartWatch.Core.Mocks;
 using WobbrockLib;
@@ -14,17 +15,25 @@ namespace SmartWatch.Core.ProximitySensors
         private readonly Recognizer.Dollar.Recognizer _recogniser;
 
         private List<TimePointF> _list;
+        private Queue<TimePointF> _queue;
+        private const int QueueCapacity = 5;
+
+        private const bool UsingQueue = true;
 
         public GestureRecognition()
         {
             _list = new List<TimePointF>();
+            _queue = new Queue<TimePointF>(QueueCapacity);
+
             _recogniser = new Recognizer.Dollar.Recognizer();
 
             LoadGestures();
 
-            _arduino = new Arduino();
+            _arduino = new Arduino("COM3");
             //_arduino = new ArduinoMock();
-            _arduino.TapRecieved += arduino_TapRecieved;
+            _arduino.DataRecieved += arduino_DataRecievedIntoQueue;
+
+            //_arduino.TapRecieved += arduino_TapRecieved;
             _arduino.Connect();
         }
 
@@ -57,21 +66,20 @@ namespace SmartWatch.Core.ProximitySensors
         private void arduino_TapRecieved(object sender, bool e)
         {
             Debug.WriteLine("Starting to detect.");
-            if (e)
-                _arduino.DataRecieved += arduino_DataRecieved;
+            if (e && !UsingQueue)
+                _arduino.DataRecieved += arduino_DataRecievedIntoList;
+            else if (e && UsingQueue)
+                _arduino.DataRecieved += arduino_DataRecievedIntoQueue;
+
         }
 
-        private void arduino_DataRecieved(object sender, TimePointF e)
+        private void arduino_DataRecievedIntoList(object sender, TimePointF e)
         {
-            if(_arduino.IsEnabled)
-                Debug.WriteLine(e.X + "\t" + e.Y + "\t" + e.Time);
-
             _list.Add(e);
 
             if (_list.Count > 6)
             {
                 var result = _recogniser.Recognize(_list, false);
-
 
                 if (result.IsEmpty)
                 {
@@ -82,11 +90,11 @@ namespace SmartWatch.Core.ProximitySensors
                     var output = String.Format("{0}, {1}, {2}, {3}{4}", result.Name,
                         Math.Round(result.Score, 2),
                         Math.Round(result.Distance, 2),
-                        Math.Round(result.Angle, 2), (char) 176);
+                        Math.Round(result.Angle, 2), (char)176);
 
                     Debug.WriteLine(output);
 
-                    _arduino.DataRecieved -= arduino_DataRecieved;
+                    _arduino.DataRecieved -= arduino_DataRecievedIntoList;
                     _list = new List<TimePointF>();
                     _arduino.IsEnabled = false;
                     Debug.WriteLine("Detection stopped.");
@@ -94,6 +102,46 @@ namespace SmartWatch.Core.ProximitySensors
             }
         }
 
+        private void arduino_DataRecievedIntoQueue(object sender, TimePointF e)
+        {
+            if (_queue.Count == QueueCapacity)
+                _queue.Dequeue();
+
+            _queue.Enqueue(e);
+
+            if (_queue.Count < QueueCapacity)
+                return;
+
+            //foreach (var item in _queue)
+            //    Debug.Write(item.X + "\t");
+            //Debug.WriteLine("");
+
+            var result = _recogniser.Recognize(_queue.ToList(), false);
+
+            if (result.IsEmpty)
+                return;
+
+            var weight = Math.Round(result.Score, 2);
+
+            if (!(weight > 0.8)) return;
+
+
+            foreach (var item in _queue)
+                Debug.Write(item.X + "\t");
+            Debug.WriteLine("");
+
+
+            var output = String.Format("{0}, {1}, {2}, {3}{4}", result.Name,
+                weight,
+                Math.Round(result.Distance, 2),
+                Math.Round(result.Angle, 2), (char) 176);
+            
+            Debug.WriteLine(output);
+
+            //_arduino.DataRecieved -= arduino_DataRecievedIntoQueue;
+            _arduino.IsEnabled = false;
+            _queue.Clear();
+        }
         #region Events
 
         public event EventHandler<PinchParameters> PinchIn;
