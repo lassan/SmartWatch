@@ -16,7 +16,7 @@ namespace SmartWatch.Core.ProximitySensors
 
         private List<TimePointF> _list;
         private Queue<TimePointF> _queue;
-        private const int QueueCapacity = 5;
+        private const int QueueCapacity = 15;
 
         private const bool UsingQueue = true;
 
@@ -33,7 +33,7 @@ namespace SmartWatch.Core.ProximitySensors
             //_arduino = new ArduinoMock();
             _arduino.DataRecieved += arduino_DataRecievedIntoQueue;
 
-            //_arduino.TapRecieved += arduino_TapRecieved;
+            _arduino.TapRecieved += arduino_TapRecieved;
             _arduino.Connect();
         }
 
@@ -104,41 +104,62 @@ namespace SmartWatch.Core.ProximitySensors
 
         private void arduino_DataRecievedIntoQueue(object sender, TimePointF e)
         {
+            //Debug.WriteLine(e.X);
+
             if (_queue.Count == QueueCapacity)
                 _queue.Dequeue();
 
-            _queue.Enqueue(e);
+            if (_queue.Count != 0)
+            {
+                
+                var difference = Math.Abs(_queue.Peek().X - e.X);
+                //Debug.Write();
+                if (difference > 0)
+                    _queue.Enqueue(e);
+            }
+            else
+            {
+                _queue.Enqueue(e);
+            }
 
             if (_queue.Count < QueueCapacity)
                 return;
-
-            //foreach (var item in _queue)
-            //    Debug.Write(item.X + "\t");
-            //Debug.WriteLine("");
 
             var result = _recogniser.Recognize(_queue.ToList(), false);
 
             if (result.IsEmpty)
                 return;
 
-            var weight = Math.Round(result.Score, 2);
+            if (!(result.Score > 0.8))
+            {
+                _queue.Clear();
+                return;
+            }
 
-            if (!(weight > 0.8)) return;
 
-
-            foreach (var item in _queue)
+            foreach (var item in _queue.ToList())
                 Debug.Write(item.X + "\t");
             Debug.WriteLine("");
 
 
             var output = String.Format("{0}, {1}, {2}, {3}{4}", result.Name,
-                weight,
+                Math.Round(result.Score, 2),
                 Math.Round(result.Distance, 2),
                 Math.Round(result.Angle, 2), (char) 176);
             
             Debug.WriteLine(output);
 
-            //_arduino.DataRecieved -= arduino_DataRecievedIntoQueue;
+            switch (char.ToLower(result.Name[0]))
+            {
+                case 'l':
+                    OnScrollHorizontal(new ScrollParameters(new Point(0,(int)e.Y), new Point(10,(int)e.Y)));
+                    break;
+                case 'r':
+                    OnScrollHorizontal(new ScrollParameters(new Point(10, (int)e.Y), new Point(0, (int)e.Y)));
+                    break;
+            }
+
+            _arduino.DataRecieved -= arduino_DataRecievedIntoQueue;
             _arduino.IsEnabled = false;
             _queue.Clear();
         }

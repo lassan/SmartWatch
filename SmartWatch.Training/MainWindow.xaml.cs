@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using System.Windows;
@@ -19,35 +20,40 @@ namespace SmartWatch.Training
 
         private List<TimePointF> _points;
 
-
         public MainWindow()
         {
-            //_arduino = new Arduino("COM3");
+            _points = new List<TimePointF>();
+
+            //TODO - Remove comment for real arduino
+            _arduino = new Arduino("COM3");
+            _arduino.DataRecieved += ArduinoDataRecieved;
 
             InitializeComponent();
         }
 
         private void StartButtonClick(object sender, RoutedEventArgs e)
         {
-            _points = new List<TimePointF>();
-            _arduino = new ArduinoMock();
+            _arduino.Connect();
 
-            if (String.IsNullOrWhiteSpace(FilenameTextBox.Text) || String.IsNullOrWhiteSpace(GestureNameTextBox.Text))
+            //TODO - Comment out for real arduino
+            //_arduino = new ArduinoMock();
+
+            if (String.IsNullOrWhiteSpace(FilenameTextBox.Text))
             {
-                MessageBox.Show("Enter a filename first and gesture name.");
+                MessageBox.Show("Enter a name first");
                 return;
             }
 
             IsRecordingTextBlock.Visibility = Visibility.Visible;
-            _arduino.DataRecieved += ArduinoDataRecieved;
         }
 
 
         private void StopButtonClick(object sender, RoutedEventArgs e)
         {
-            _arduino.DataRecieved -= ArduinoDataRecieved;
-            var filename = FilenameTextBox.Text;
-            var name = GestureNameTextBox.Text;
+            _arduino.Dispose();
+
+            var filename = FilenameTextBox.Text + ".xml";
+            var name = FilenameTextBox.Text;
 
             if (_points.Count > 1)
             {
@@ -97,7 +103,7 @@ namespace SmartWatch.Training
             
             // Clear text fields to avoid overwriting files
             FilenameTextBox.Text = String.Empty;
-            GestureNameTextBox.Text = String.Empty;
+            _points.Clear();
         }
 
 

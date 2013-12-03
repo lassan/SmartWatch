@@ -3,7 +3,7 @@ using WobbrockLib;
 
 namespace SmartWatch.Core
 {
-    public interface IArduino
+    public interface IArduino: IDisposable
     {
         bool IsEnabled { get; set; }
 

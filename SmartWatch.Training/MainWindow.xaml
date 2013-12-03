@@ -4,11 +4,9 @@
         Title="Generate Training Data" Height="350" Width="525">
     <Grid>
         <StackPanel>
-            <TextBlock>Filename:</TextBlock>
+            <TextBlock>Name:</TextBlock>
             <TextBox x:Name="FilenameTextBox" />
 
-            <TextBlock>Gesture name:</TextBlock>
-            <TextBox x:Name="GestureNameTextBox" />
             <Button Content="Start"
                     Background="Green"
                     Click="StartButtonClick" />

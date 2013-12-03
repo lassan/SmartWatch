@@ -2,6 +2,7 @@
 using System.Windows;
 using SmartWatch.Core.Gestures;
 using SmartWatch.Core.Mocks;
+using SmartWatch.Core.ProximitySensors;
 
 namespace SmartWatch.Menu
 {
@@ -13,7 +14,9 @@ namespace SmartWatch.Menu
         public MainWindow()
         {
             InitializeComponent();
-            var gestures = new RandomGestures();
+            //var gestures = new RandomGestures();
+            var gestures = new GestureRecognition();
+
             gestures.ScrollVertical += gestures_ScrollVertical;
             gestures.ScrollHorizontal += gestures_ScrollHorizontal;
         }
@@ -21,11 +24,13 @@ namespace SmartWatch.Menu
         private void gestures_ScrollHorizontal(object sender, ScrollParameters e)
         {
             var shouldScrollLeft = (ScrollViewerControl.ScrollableWidth > 0) &&
-                                   (ScrollViewerControl.HorizontalOffset > 0);
+                                   (ScrollViewerControl.HorizontalOffset > 0) &&
+                                   e.StartPoint.x < e.EndPoint.x;
 
             var shouldScrollRight = (ScrollViewerControl.ScrollableWidth > 0) &&
                                     ((ScrollViewerControl.HorizontalOffset + ScrollViewerControl.ViewportWidth) <
-                                     ScrollViewerControl.ExtentWidth);
+                                     ScrollViewerControl.ExtentWidth) &&
+                                     e.StartPoint.x > e.EndPoint.x;
 
             if (shouldScrollLeft)
             {

@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO.Ports;
+using System.Linq;
 using System.Threading;
 using WobbrockLib;
 using WobbrockLib.Extensions;
 
 namespace SmartWatch.Core
 {
-    public class Arduino : IDisposable, IArduino
+    public class Arduino : IArduino
     {
         #region Data Model
 
@@ -19,12 +20,22 @@ namespace SmartWatch.Core
 
         public Arduino(string portName)
         {
-            _serialPort = new SerialPort {PortName = portName, BaudRate = 9600, Handshake = Handshake.None};
+            _serialPort = new SerialPort
+            {
+                PortName = portName,
+                BaudRate = 19200,
+                Handshake = Handshake.None,
+                ReadTimeout = 500
+                //ReadBufferSize = 12
+            };
+
             _serialPort.DataReceived += _serialPort_DataReceived;
 
         }
 
         #endregion
+
+
 
         /// <summary>
         ///     Event that is raised when there is data on the serial port from the Arduino.
@@ -36,28 +47,29 @@ namespace SmartWatch.Core
             var serialPort = (SerialPort) sender;
             var data = serialPort.ReadLine();
             
-
+            //Debug.Write(data);
             var array = data.Split('|');
+
+            if (array.Length != 4)
+                return;
+
             var tapped = Int32.Parse(array[0]);
-            var ambient1 = Int32.Parse(array[1]);
-            var proximity1 = Int32.Parse(array[2]);
-
-            //if (tapped == 1)
-            //    OnTapped(true);
+            var proximity1 = Int32.Parse(array[1]);
+            var proximity2 = Int32.Parse(array[2]);
+            var proximity3 = Int32.Parse(array[3]);
 
 
-            //proximity1 = MapProximity(proximity1);
+            if (tapped == 1 && IsEnabled == false)
+            {
+                IsEnabled = true;
+                OnTapped(true);
+            }
 
-            //if (IsEnabled == false && proximity1 > 25 && proximity1 <= 150)
-            //{
-            //    OnTapped(true);
-            //    IsEnabled = true;
-            //    _time = 1;
-            //}
+            var tpf1 = new TimePointF(proximity1, 1, TimeEx.NowMs);
+            var tpf2 = new TimePointF(proximity2, 2, TimeEx.NowMs);
+            var tpf3 = new TimePointF(proximity3, 2, TimeEx.NowMs);
 
-            var tpf1 = new TimePointF(proximity1, 2, TimeEx.NowMs);
-
-            OnDataRecieved(tpf1);
+            OnDataRecieved(tpf2);
         }
 
         private int MapProximity(int val)

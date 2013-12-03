@@ -6,7 +6,7 @@ using WobbrockLib;
 
 namespace SmartWatch.Core.Mocks
 {
-    public class ArduinoMock : IArduino, IDisposable
+    public class ArduinoMock : IArduino
     {
         public ArduinoMock()
         {
@@ -15,20 +15,37 @@ namespace SmartWatch.Core.Mocks
 
         public void GenerateTestData()
         {
-            var list = new List<TimePointF>();
-
-            var l = 30;
-
-            for (var i = 0; i < l; i++)
+            var left02 = new List<TimePointF>
             {
-                if (i == 5 || i == 15)
-                    OnTapped(true);
+                new TimePointF(45, 2, 63521666942371),
+                new TimePointF(45, 2, 63521666942699),
+                new TimePointF(47, 2, 63521666943043),
+                new TimePointF(52, 2, 63521666943371),
+                new TimePointF(97, 2, 63521666943715)
+            };
 
-                var tpf = new TimePointF(i, 1, 10);
-                list.Add(tpf);
-            }
+            var left04 = new List<TimePointF>
+            {
+                new TimePointF(45, 2, 63521667003788),
+                new TimePointF(46, 2, 63521667004101),
+                new TimePointF(48, 2, 63521667004444),
+                new TimePointF(67, 2, 63521667004773),
+                new TimePointF(150, 2, 63521667005116)
 
-            foreach (var item in list)
+            };
+
+            //var l = 30;
+
+            //for (var i = 0; i < l; i++)
+            //{
+            //    if (i == 5 || i == 15)
+            //        OnTapped(true);
+
+            //    var tpf = new TimePointF(i, 1, 10);
+            //    list.Add(tpf);
+            //}
+
+            foreach (var item in left04)
             {
                 OnDataRecieved(item);
                 Thread.Sleep(100);
