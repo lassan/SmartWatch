@@ -112,10 +112,19 @@ namespace SmartWatch.Core.ProximitySensors
             if (_queue.Count != 0)
             {
                 
-                var difference = Math.Abs(_queue.Peek().X - e.X);
-                //Debug.Write();
+                var difference = Math.Abs(_queue.LastOrDefault().X - e.X);
+                Debug.WriteLine(difference);
+                Debug.WriteLine(_queue.LastOrDefault().X);
+                Debug.WriteLine(e.X);
+                Debug.WriteLine("--------------------------");
+
                 if (difference > 0)
                     _queue.Enqueue(e);
+                foreach (var item in _queue.ToList())
+                    Debug.Write(item.X + "\t");
+                Debug.WriteLine("");
+                Debug.WriteLine("+++++++++++++++++++++++++");
+                
             }
             else
             {
@@ -132,7 +141,7 @@ namespace SmartWatch.Core.ProximitySensors
 
             if (!(result.Score > 0.8))
             {
-                _queue.Clear();
+                //_queue.Clear();
                 return;
             }
 
@@ -161,7 +170,7 @@ namespace SmartWatch.Core.ProximitySensors
 
             _arduino.DataRecieved -= arduino_DataRecievedIntoQueue;
             _arduino.IsEnabled = false;
-            _queue.Clear();
+            _queue = new Queue<TimePointF>();
         }
         #region Events
 
