@@ -3,28 +3,72 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:visualiser="clr-namespace:SmartWatch.Visualiser"
         Title="MainWindow" Height="350" Width="525"
-        Name="window"
+        x:Name="window"
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
-    
+
     <Grid DataContext="{Binding ViewModel}">
-        
+
         <Grid.Resources>
             <Style TargetType="Rectangle">
-                <Setter Property="Width" Value="50"></Setter>
-                <Setter Property="Fill" Value="Red"></Setter>
-                <Setter Property="Margin" Value="20"></Setter>
-                <Setter Property="HorizontalAlignment" Value="Center"></Setter>
-                <Setter Property="VerticalAlignment" Value="Bottom"></Setter>
+                <Setter Property="Width" Value="50" />
+                <Setter Property="Fill" Value="Red" />
+                <Setter Property="Margin" Value="20" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Bottom" />
             </Style>
             
+            <Style TargetType="TextBlock">
+                <Setter Property="HorizontalAlignment" Value="Center"></Setter>
+            </Style>
+
+            <visualiser:ProximityToHeight x:Key="ProximityToHeight" 
+                                          MaxProximity="150" 
+                                          Margin="100"/>
+
         </Grid.Resources>
-        
+
         <StackPanel Orientation="Horizontal"
-                    VerticalAlignment="Bottom" 
+                    VerticalAlignment="Bottom"
                     HorizontalAlignment="Left">
-            <Rectangle Height="{Binding Sensor1Proximity}"></Rectangle>
-            <Rectangle Height="{Binding Sensor2Proximity}"></Rectangle>
-            <Rectangle Height="{Binding Sensor3Proximity}"></Rectangle>
+
+            <!-- Sensor 1 -->
+            <StackPanel>
+                <Rectangle>
+                    <Rectangle.Height>
+                        <MultiBinding Converter="{StaticResource ProximityToHeight}">
+                            <Binding Path="Sensor1Proximity" />
+                            <Binding ElementName="window" Path="ActualHeight" />
+                        </MultiBinding>
+                    </Rectangle.Height>
+                </Rectangle>
+                <TextBlock>Sensor 1</TextBlock>
+            </StackPanel>
+
+            <!-- Sensor 2 -->
+            <StackPanel>
+                <Rectangle>
+                    <Rectangle.Height>
+                        <MultiBinding Converter="{StaticResource ProximityToHeight}">
+                            <Binding Path="Sensor2Proximity" />
+                            <Binding ElementName="window" Path="ActualHeight" />
+                        </MultiBinding>
+                    </Rectangle.Height>
+                </Rectangle>
+                <TextBlock>Sensor 2</TextBlock>
+            </StackPanel>
+
+            <!-- Sensor 3 -->
+            <StackPanel>
+                <Rectangle>
+                    <Rectangle.Height>
+                        <MultiBinding Converter="{StaticResource ProximityToHeight}">
+                            <Binding Path="Sensor3Proximity" />
+                            <Binding ElementName="window" Path="ActualHeight" />
+                        </MultiBinding>
+                    </Rectangle.Height>
+                </Rectangle>
+                <TextBlock>Sensor 3</TextBlock>
+            </StackPanel>
         </StackPanel>
 
     </Grid>
