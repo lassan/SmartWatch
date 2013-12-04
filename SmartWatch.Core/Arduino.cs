@@ -47,7 +47,6 @@ namespace SmartWatch.Core
             var serialPort = (SerialPort) sender;
             var data = serialPort.ReadLine();
             
-            //Debug.Write(data);
             var array = data.Split('|');
 
             if (array.Length != 4)
@@ -59,11 +58,11 @@ namespace SmartWatch.Core
             var proximity3 = Int32.Parse(array[3]);
 
 
-            if (tapped == 1 && IsEnabled == false)
-            {
-                IsEnabled = true;
-                OnTapped(true);
-            }
+            //if (tapped == 1 && IsEnabled == false)
+            //{
+            //    IsEnabled = true;
+            //    OnTapped(true);
+            //}
 
             var tpf1 = new TimePointF(proximity1, 1, TimeEx.NowMs);
             var tpf2 = new TimePointF(proximity2, 2, TimeEx.NowMs);

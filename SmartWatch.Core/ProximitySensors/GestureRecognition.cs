@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Recognizer.Dollar;
 using SmartWatch.Core.Gestures;
 using SmartWatch.Core.Mocks;
 using WobbrockLib;
@@ -16,7 +17,7 @@ namespace SmartWatch.Core.ProximitySensors
 
         private List<TimePointF> _list;
         private Queue<TimePointF> _queue;
-        private const int QueueCapacity = 15;
+        private const int QueueCapacity = 25;
 
         private const bool UsingQueue = true;
 
@@ -29,11 +30,11 @@ namespace SmartWatch.Core.ProximitySensors
 
             LoadGestures();
 
-            _arduino = new Arduino("COM3");
+            _arduino = new Arduino("COM4");
             //_arduino = new ArduinoMock();
             _arduino.DataRecieved += arduino_DataRecievedIntoQueue;
 
-            _arduino.TapRecieved += arduino_TapRecieved;
+            //_arduino.TapRecieved += arduino_TapRecieved;
             _arduino.Connect();
         }
 
@@ -111,20 +112,21 @@ namespace SmartWatch.Core.ProximitySensors
 
             if (_queue.Count != 0)
             {
-                
-                var difference = Math.Abs(_queue.LastOrDefault().X - e.X);
-                Debug.WriteLine(difference);
-                Debug.WriteLine(_queue.LastOrDefault().X);
-                Debug.WriteLine(e.X);
-                Debug.WriteLine("--------------------------");
 
-                if (difference > 0)
-                    _queue.Enqueue(e);
-                foreach (var item in _queue.ToList())
-                    Debug.Write(item.X + "\t");
-                Debug.WriteLine("");
-                Debug.WriteLine("+++++++++++++++++++++++++");
-                
+
+                //var difference = Math.Abs(_queue.LastOrDefault().X - e.X);
+                //Debug.WriteLine(difference);
+                //Debug.WriteLine(_queue.LastOrDefault().X);
+                //Debug.WriteLine(e.X);
+                //Debug.WriteLine("--------------------------");
+
+                //if (difference > 0)
+                _queue.Enqueue(e);
+                //foreach (var item in _queue.ToList())
+                //    Debug.Write(item.X + "\t");
+                //Debug.WriteLine("");
+                //Debug.WriteLine("+++++++++++++++++++++++++");
+
             }
             else
             {
@@ -134,14 +136,26 @@ namespace SmartWatch.Core.ProximitySensors
             if (_queue.Count < QueueCapacity)
                 return;
 
-            var result = _recogniser.Recognize(_queue.ToList(), false);
+            var diff = _queue.Max(x => x.X) - _queue.Min(x => x.X);
+
+            NBestList result;
+            if (diff > 15)
+            {
+                Debug.WriteLine(diff);
+                result = _recogniser.Recognize(_queue.ToList(), false);
+
+            }
+
+        
+
+    else return;
 
             if (result.IsEmpty)
                 return;
 
             if (!(result.Score > 0.8))
             {
-                //_queue.Clear();
+                _queue.Clear();
                 return;
             }
 
@@ -168,7 +182,7 @@ namespace SmartWatch.Core.ProximitySensors
                     break;
             }
 
-            _arduino.DataRecieved -= arduino_DataRecievedIntoQueue;
+            //_arduino.DataRecieved -= arduino_DataRecievedIntoQueue;
             _arduino.IsEnabled = false;
             _queue = new Queue<TimePointF>();
         }

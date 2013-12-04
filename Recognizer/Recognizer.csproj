@@ -36,7 +36,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="WobbrockLib, Version=2.7.4.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\WobbrockLib.dll</HintPath>
+      <HintPath>..\..\..\..\Downloads\dollar\$1\bin\Debug\WobbrockLib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
