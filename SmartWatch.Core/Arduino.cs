@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO.Ports;
 using WobbrockLib;
 using WobbrockLib.Extensions;
@@ -40,31 +41,44 @@ namespace SmartWatch.Core
         /// <param name="e"></param>
         private void _serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            var serialPort = (SerialPort) sender;
-            var data = serialPort.ReadLine();
+            var data = String.Empty;
+            try
+            {
 
-            var array = data.Split('|');
+                var serialPort = (SerialPort) sender;
+                data = serialPort.ReadLine();
 
-            if (array.Length != 4)
-                return;
+                Debug.WriteLine(data);
 
-            var tapped = Int32.Parse(array[0]);
-            var proximity1 = Int32.Parse(array[1]);
-            var proximity2 = Int32.Parse(array[2]);
-            var proximity3 = Int32.Parse(array[3]);
+                var array = data.Split('|');
+
+                if (array.Length != 4)
+                    return;
+
+                var tapped = Int32.Parse(array[0]);
+                var proximity1 = Int32.Parse(array[1]);
+                var proximity2 = Int32.Parse(array[2]);
+                var proximity3 = Int32.Parse(array[3]);
 
 
-            //if (tapped == 1 && IsEnabled == false)
-            //{
-            //    IsEnabled = true;
-            //    OnTapped(true);
-            //}
+                //if (tapped == 1 && IsEnabled == false)
+                //{
+                //    IsEnabled = true;
+                //    OnTapped(true);
+                //}
 
-            var tpf1 = new TimePointF(proximity1, 1, TimeEx.NowMs);
-            var tpf2 = new TimePointF(proximity2, 2, TimeEx.NowMs);
-            var tpf3 = new TimePointF(proximity3, 2, TimeEx.NowMs);
+                var tpf1 = new TimePointF(proximity1, 1, TimeEx.NowMs);
+                var tpf2 = new TimePointF(proximity2, 2, TimeEx.NowMs);
+                var tpf3 = new TimePointF(proximity3, 2, TimeEx.NowMs);
 
-            OnDataRecieved(new List<TimePointF> {tpf1, tpf2, tpf3});
+                OnDataRecieved(new List<TimePointF> {tpf1, tpf2, tpf3});
+            }
+            catch (Exception)
+            {
+                Debug.Write("Invalid data:\t");
+                Debug.WriteLine(data);
+
+            }
         }
 
         private int MapProximity(int val)
