@@ -107,9 +107,9 @@ namespace SmartWatch.Training
         }
 
 
-        private void ArduinoDataRecieved(object sender, TimePointF e)
+        private void ArduinoDataRecieved(object sender, List<TimePointF> e)
         {
-            _points.Add(e);
+            _points.Add(e[0]);
         }
     }
 }
