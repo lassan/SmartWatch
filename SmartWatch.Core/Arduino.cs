@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO.Ports;
 using WobbrockLib;
 using WobbrockLib.Extensions;
@@ -41,17 +41,31 @@ namespace SmartWatch.Core
         private void _serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             var serialPort = (SerialPort) sender;
-            var data = serialPort.ReadLine();
 
-            var array = data.Split('|');
+            string data = String.Empty;
+
+            try
+            {
+                data = serialPort.ReadLine();
+                //Debug.Write(data);
+            }
+            catch (Exception)
+            {
+                Debug.Write("Invalid data:\t ");
+                Debug.WriteLine(data);
+                return;
+            }
+
+            string[] array = data.Split('|');
 
             if (array.Length != 4)
                 return;
 
-            var tapped = Int32.Parse(array[0]);
-            var proximity1 = Int32.Parse(array[1]);
-            var proximity2 = Int32.Parse(array[2]);
-            var proximity3 = Int32.Parse(array[3]);
+
+            int tapped = Int32.Parse(array[0]);
+            int proximity1 = Int32.Parse(array[1]);
+            int proximity2 = Int32.Parse(array[2]);
+            int proximity3 = Int32.Parse(array[3]);
 
 
             //if (tapped == 1 && IsEnabled == false)
@@ -99,13 +113,13 @@ namespace SmartWatch.Core
         /// </summary>
         protected virtual void OnDataRecieved(List<TimePointF> e)
         {
-            var handler = DataRecieved;
+            EventHandler<List<TimePointF>> handler = DataRecieved;
             if (handler != null) handler(this, e);
         }
 
         protected virtual void OnTapped(bool e)
         {
-            var handler = TapRecieved;
+            EventHandler<bool> handler = TapRecieved;
             if (handler != null) handler(this, e);
         }
 

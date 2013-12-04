@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System;
+using System.Diagnostics;
+using System.Threading;
 using System.Windows;
 using SmartWatch.Core.Gestures;
 using SmartWatch.Core.Mocks;
@@ -23,6 +25,7 @@ namespace SmartWatch.Menu
 
         private void gestures_ScrollHorizontal(object sender, ScrollParameters e)
         {
+            Debug.WriteLine(e);
             var shouldScrollLeft = (ScrollViewerControl.ScrollableWidth > 0) &&
                                    (ScrollViewerControl.HorizontalOffset > 0) &&
                                    e.StartPoint.x < e.EndPoint.x;
@@ -58,6 +61,8 @@ namespace SmartWatch.Menu
 
         private void gestures_ScrollVertical(object sender, ScrollParameters e)
         {
+            Debug.WriteLine(e);
+
             var shouldScrollUp = (ScrollViewerControl.ScrollableHeight > 0) && (ScrollViewerControl.VerticalOffset > 0);
 
             var shouldScrollDown = (ScrollViewerControl.ScrollableHeight > 0) &&

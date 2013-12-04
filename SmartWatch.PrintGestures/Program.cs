@@ -17,7 +17,6 @@ namespace SmartWatch.PrintGestures
             gestures.ScrollVertical += GesturesScrollVertical;
             gestures.ScrollDiagonal += GesturesScrollDiagonal;
 
-            Console.Read();
         }
 
         private static string PinchStringBuilder(PinchParameters e, string heading)

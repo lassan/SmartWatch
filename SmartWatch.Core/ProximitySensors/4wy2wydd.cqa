@@ -17,7 +17,6 @@ namespace SmartWatch.Core.ProximitySensors
         private const bool UsingQueue = true;
         private readonly IArduino _arduino;
         private readonly Recognizer.Dollar.Recognizer _recogniser;
-        private int pause = 0;
 
         private List<TimePointF> _list;
         private Queue<TimePointF> _queue;
@@ -76,8 +75,7 @@ namespace SmartWatch.Core.ProximitySensors
 
         private void arduino_DataRecievedIntoList(object sender, List<TimePointF> e)
         {
-            _list.Add(e[1]);
-            
+            _list.Add(e[0]);
 
             if (_list.Count > 6)
             {
@@ -106,24 +104,9 @@ namespace SmartWatch.Core.ProximitySensors
 
         private void arduino_DataRecievedIntoQueue(object sender, List<TimePointF> e)
         {
-            const int max = 15;
+            //Debug.WriteLine(e.X);
 
-            if (_list.Any(item => (int) item.X == (int)e[0].X))
-            {
-                return;
-            }
-
-            if (pause == 0)
-                _list.Add(e[0]);
-            else
-            {
-                pause--;
-            }
-
-            if (_list.Count > max)
-            {
-                _list.RemoveAt(0);
-            }
+            _list.Add(e[1]);
 
             var xList = new List<int>();
             foreach(var item in _list)
@@ -131,53 +114,11 @@ namespace SmartWatch.Core.ProximitySensors
 
             var filtered_list = process(xList);
 
-
-
             // every time theres a new data, it tries to do a detection
-            var result = 0;
-
-            if (filtered_list.Count > 0 && pause == 0)
-            {
-                var index = 0;
-                //if (filtered_list.Max() > 20)
-                //{
-                //    index = filtered_list.IndexOf(filtered_list.Max()) + 1;
-
-                //    _list = _list.GetRange(index, _list.Count - index);
-                //    xList = xList.GetRange(index, xList.Count - index);
-                //    filtered_list = filtered_list.GetRange(index, filtered_list.Count - index);
-                //}
-                //else if (filtered_list.Min() < -20)
-                //{
-                //    index = filtered_list.IndexOf(filtered_list.Min());
-
-                //    _list = _list.GetRange(0, index);
-                //    xList = xList.GetRange(0, index);
-                //    filtered_list = filtered_list.GetRange(0, index);
-                //}
-                if(xList.Count != 0)
-                    result = Detect(xList, filtered_list);
-
-                if (result == 1)
-                {
-
-                    pause = 8;
-
-                    _list = new List<TimePointF>();
-
-                    //foreach (var item in filtered_list)
-                    //{
-                    //    Debug.Write(item);
-                    //    Debug.Write("   ");
-                    //}
-
-
-                    //Debug.WriteLine("---------------");
-                }
-            }
+            xList = Detect(xList, filtered_list);
         }
 
-        private int Detect(List<int> list, List<int> gradient)
+        private List<int> Detect(List<int> list, List<int> gradient)
         {
             int min = 0;
             int max = 100;
@@ -187,56 +128,79 @@ namespace SmartWatch.Core.ProximitySensors
 
             if (list.Max() - list.Min() < valid_dist)
             {
-               // Debug.WriteLine("quiting");
-                return 0;
+                Debug.WriteLine("quiting");
+            }
+            else
+            {
+                Debug.WriteLine("running");
+
+                list = new List<int>();
             }
 
             int pos = 0;
             int neg = 0;
-            int count = 0;
 
-            foreach (var item in gradient)
+            forearch (var item in gradient)
             {
-               if (item > 20)
-                {
-                    pos = 0;
-                    neg = 0;
-                    count = 0;
-                }
-                //else if (item < -10)
-                //{
-                //    break;
-                //}
-                else if (item > 0)
+                if (item > 0)
                 {
                     pos++;
-                    count++;
                 }
                 else if (item < 0)
                 {
                     neg++;
-                    count++;
                 }
             }
 
-            if (pos > neg && count >  8)
-            {
-                Debug.WriteLine("LEFT");
-                OnScrollHorizontal(new ScrollParameters(new Point(0, 0), new Point(10, 0)));
+            return sadfsadfdsafsa;
 
-            }
-            else if (neg > pos && count > 8)
-            {
-                Debug.WriteLine(("RIGHT"));
-                OnScrollHorizontal(new ScrollParameters(new Point(10, 0), new Point(0, 0)));
+            int number = 5;
 
-            }
-            else
+            int b = 0;
+
+            int ii = 0;
+            int jj = 0;
+
+            for (int i = 0; i < gradient.Count - number; i++)
             {
-                return 0;
+                for (int j = 0; j < number; j++)
+                {
+                    if (gradient[i + j] < 0)
+                    {
+                        b = 1;
+                        jj = j;
+                        break;
+                    }
+                }
+
+                if (b == 1)
+                {
+                    ii = i;
+                    break;
+                }
             }
 
-            return 1;
+            if (b == 0 && gradient.Count >= number)
+            {
+                Debug.WriteLine("scroll to the right");
+
+                foreach (int item in list)
+                {
+                    Debug.WriteLine(item);
+                }
+
+                Debug.WriteLine("11111111111111111");
+                OnScrollHorizontal(new ScrollParameters(new Point(0, 50), new Point(100, 50)));
+
+                list.RemoveRange(0, ii + jj);
+
+                foreach (int item in list)
+                {
+                    Debug.WriteLine(item);
+                }
+            }
+
+            return list;
         }
 
         // apply filter to the list
