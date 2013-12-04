@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO.Ports;
-using System.Linq;
-using System.Threading;
 using WobbrockLib;
 using WobbrockLib.Extensions;
 
@@ -30,12 +29,9 @@ namespace SmartWatch.Core
             };
 
             _serialPort.DataReceived += _serialPort_DataReceived;
-
         }
 
         #endregion
-
-
 
         /// <summary>
         ///     Event that is raised when there is data on the serial port from the Arduino.
@@ -46,7 +42,7 @@ namespace SmartWatch.Core
         {
             var serialPort = (SerialPort) sender;
             var data = serialPort.ReadLine();
-            
+
             var array = data.Split('|');
 
             if (array.Length != 4)
@@ -68,7 +64,7 @@ namespace SmartWatch.Core
             var tpf2 = new TimePointF(proximity2, 2, TimeEx.NowMs);
             var tpf3 = new TimePointF(proximity3, 2, TimeEx.NowMs);
 
-            OnDataRecieved(tpf2);
+            OnDataRecieved(new List<TimePointF> {tpf1, tpf2, tpf3});
         }
 
         private int MapProximity(int val)
@@ -83,7 +79,7 @@ namespace SmartWatch.Core
 
         #region IArudino Members
 
-        public event EventHandler<TimePointF> DataRecieved;
+        public event EventHandler<List<TimePointF>> DataRecieved;
 
         public event EventHandler<bool> TapRecieved;
 
@@ -101,7 +97,7 @@ namespace SmartWatch.Core
         /// <summary>
         ///     Event that is invoked when there is data that should be used by any one else is ready
         /// </summary>
-        protected virtual void OnDataRecieved(TimePointF e)
+        protected virtual void OnDataRecieved(List<TimePointF> e)
         {
             var handler = DataRecieved;
             if (handler != null) handler(this, e);

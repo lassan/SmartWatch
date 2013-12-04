@@ -31,7 +31,6 @@ namespace SmartWatch.Core.Mocks
                 new TimePointF(48, 2, 63521667004444),
                 new TimePointF(67, 2, 63521667004773),
                 new TimePointF(150, 2, 63521667005116)
-
             };
 
             //var l = 30;
@@ -47,14 +46,14 @@ namespace SmartWatch.Core.Mocks
 
             foreach (var item in left04)
             {
-                OnDataRecieved(item);
+                OnDataRecieved(new List<TimePointF> {item, item, item});
                 Thread.Sleep(100);
             }
         }
 
         #region IArduino Members
 
-        public event EventHandler<TimePointF> DataRecieved;
+        public event EventHandler<List<TimePointF>> DataRecieved;
 
         public event EventHandler<bool> TapRecieved;
 
@@ -68,7 +67,7 @@ namespace SmartWatch.Core.Mocks
 
         #region Event Invokers
 
-        protected virtual void OnDataRecieved(TimePointF e)
+        protected virtual void OnDataRecieved(List<TimePointF> e)
         {
             var handler = DataRecieved;
             if (handler != null) handler(this, e);

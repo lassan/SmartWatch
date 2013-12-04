@@ -5,21 +5,20 @@ using System.IO;
 using System.Linq;
 using Recognizer.Dollar;
 using SmartWatch.Core.Gestures;
-using SmartWatch.Core.Mocks;
 using WobbrockLib;
 
 namespace SmartWatch.Core.ProximitySensors
 {
     public class GestureRecognition : IGestures
     {
+        private const int QueueCapacity = 25;
+
+        private const bool UsingQueue = true;
         private readonly IArduino _arduino;
         private readonly Recognizer.Dollar.Recognizer _recogniser;
 
         private List<TimePointF> _list;
         private Queue<TimePointF> _queue;
-        private const int QueueCapacity = 25;
-
-        private const bool UsingQueue = true;
 
         public GestureRecognition()
         {
@@ -69,14 +68,13 @@ namespace SmartWatch.Core.ProximitySensors
             Debug.WriteLine("Starting to detect.");
             if (e && !UsingQueue)
                 _arduino.DataRecieved += arduino_DataRecievedIntoList;
-            else if (e && UsingQueue)
+            if (e && UsingQueue)
                 _arduino.DataRecieved += arduino_DataRecievedIntoQueue;
-
         }
 
-        private void arduino_DataRecievedIntoList(object sender, TimePointF e)
+        private void arduino_DataRecievedIntoList(object sender, List<TimePointF> e)
         {
-            _list.Add(e);
+            _list.Add(e[0]);
 
             if (_list.Count > 6)
             {
@@ -91,7 +89,7 @@ namespace SmartWatch.Core.ProximitySensors
                     var output = String.Format("{0}, {1}, {2}, {3}{4}", result.Name,
                         Math.Round(result.Score, 2),
                         Math.Round(result.Distance, 2),
-                        Math.Round(result.Angle, 2), (char)176);
+                        Math.Round(result.Angle, 2), (char) 176);
 
                     Debug.WriteLine(output);
 
@@ -103,7 +101,7 @@ namespace SmartWatch.Core.ProximitySensors
             }
         }
 
-        private void arduino_DataRecievedIntoQueue(object sender, TimePointF e)
+        private void arduino_DataRecievedIntoQueue(object sender, List<TimePointF> e)
         {
             //Debug.WriteLine(e.X);
 
@@ -112,8 +110,6 @@ namespace SmartWatch.Core.ProximitySensors
 
             if (_queue.Count != 0)
             {
-
-
                 //var difference = Math.Abs(_queue.LastOrDefault().X - e.X);
                 //Debug.WriteLine(difference);
                 //Debug.WriteLine(_queue.LastOrDefault().X);
@@ -121,16 +117,15 @@ namespace SmartWatch.Core.ProximitySensors
                 //Debug.WriteLine("--------------------------");
 
                 //if (difference > 0)
-                _queue.Enqueue(e);
+                _queue.Enqueue(e[0]);
                 //foreach (var item in _queue.ToList())
                 //    Debug.Write(item.X + "\t");
                 //Debug.WriteLine("");
                 //Debug.WriteLine("+++++++++++++++++++++++++");
-
             }
             else
             {
-                _queue.Enqueue(e);
+                _queue.Enqueue(e[0]);
             }
 
             if (_queue.Count < QueueCapacity)
@@ -141,14 +136,10 @@ namespace SmartWatch.Core.ProximitySensors
             NBestList result;
             if (diff > 15)
             {
-                Debug.WriteLine(diff);
+                //Debug.WriteLine(diff);
                 result = _recogniser.Recognize(_queue.ToList(), false);
-
             }
-
-        
-
-    else return;
+            else return;
 
             if (result.IsEmpty)
                 return;
@@ -164,28 +155,38 @@ namespace SmartWatch.Core.ProximitySensors
                 Debug.Write(item.X + "\t");
             Debug.WriteLine("");
 
-
             var output = String.Format("{0}, {1}, {2}, {3}{4}", result.Name,
                 Math.Round(result.Score, 2),
                 Math.Round(result.Distance, 2),
                 Math.Round(result.Angle, 2), (char) 176);
-            
-            Debug.WriteLine(output);
 
-            switch (char.ToLower(result.Name[0]))
-            {
-                case 'l':
-                    OnScrollHorizontal(new ScrollParameters(new Point(0,(int)e.Y), new Point(10,(int)e.Y)));
-                    break;
-                case 'r':
-                    OnScrollHorizontal(new ScrollParameters(new Point(10, (int)e.Y), new Point(0, (int)e.Y)));
-                    break;
-            }
+            Debug.WriteLine(output);
 
             //_arduino.DataRecieved -= arduino_DataRecievedIntoQueue;
             _arduino.IsEnabled = false;
             _queue = new Queue<TimePointF>();
+
+            CreateGestureEvents(e[0], result);
         }
+
+        /// <summary>
+        ///     Creates the gesture events from the detected gesture for applications to use
+        /// </summary>
+        /// <param name="e"></param>
+        /// <param name="result"></param>
+        private void CreateGestureEvents(TimePointF e, NBestList result)
+        {
+            switch (char.ToLower(result.Name[0]))
+            {
+                case 'l':
+                    OnScrollHorizontal(new ScrollParameters(new Point(0, (int) e.Y), new Point(10, (int) e.Y)));
+                    break;
+                case 'r':
+                    OnScrollHorizontal(new ScrollParameters(new Point(10, (int) e.Y), new Point(0, (int) e.Y)));
+                    break;
+            }
+        }
+
         #region Events
 
         public event EventHandler<PinchParameters> PinchIn;
