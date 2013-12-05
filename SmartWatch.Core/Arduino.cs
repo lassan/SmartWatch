@@ -81,65 +81,6 @@ namespace SmartWatch.Core
 
         #endregion
 
-        /// <summary>
-        ///     Event that is raised when there is data on the serial port from the Arduino.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void _serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
-            var data = String.Empty;
-            int tapped;
-            int proximity1 = 0;
-            int proximity2 = 0;
-            int proximity3 = 0;
-            bool exception = false;
-            try
-            {
-                var serialPort = (SerialPort)sender;
-                data = serialPort.ReadLine();
-
-                var array = data.Split('|');
-
-                if (array.Length != 4)
-                    return;
-
-                tapped = Int32.Parse(array[0]);
-                proximity1 = Int32.Parse(array[1]);
-                proximity2 = Int32.Parse(array[2]);
-                proximity3 = Int32.Parse(array[3]);
-            }
-            catch (Exception)
-            {
-                exception = true;
-                Debug.Write("Invalid data:\t");
-                Debug.WriteLine(data);
-            }
-            //if (tapped == 1 && IsEnabled == false)
-            //{
-            //    IsEnabled = true;
-            //    OnTapped(true);
-            //}
-            if (!exception)
-            {
-                var tpf1 = new TimePointF(proximity1, 1, TimeEx.NowMs);
-                var tpf2 = new TimePointF(proximity2, 2, TimeEx.NowMs);
-                var tpf3 = new TimePointF(proximity3, 2, TimeEx.NowMs);
-
-                OnDataRecieved(new List<TimePointF> { tpf1, tpf2, tpf3 });
-            }
-        }
-
-        private int MapProximity(int val)
-        {
-            if (val < 2500)
-                val = 2500;
-            else if (val > 5000)
-                val = 5000;
-
-            return val / 20 - 100;
-        }
-
         #region IArudino Members
 
         public event EventHandler<List<TimePointF>> DataRecieved;
