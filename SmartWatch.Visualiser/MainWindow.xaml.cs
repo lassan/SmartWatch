@@ -9,6 +9,7 @@ namespace SmartWatch.Visualiser
     /// </summary>
     public partial class MainWindow : Window
     {
+
         public MainWindow()
         {
             var arduino = new ArduinoMock();
