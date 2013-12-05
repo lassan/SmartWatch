@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Xml;
 using SmartWatch.Core;
@@ -33,8 +34,6 @@ namespace SmartWatch.Training
 
         private void StartButtonClick(object sender, RoutedEventArgs e)
         {
-            _arduino.Connect();
-
             //TODO - Comment out for real arduino
             //_arduino = new ArduinoMock();
 
@@ -50,8 +49,6 @@ namespace SmartWatch.Training
 
         private void StopButtonClick(object sender, RoutedEventArgs e)
         {
-            _arduino.Dispose();
-
             var filename = FilenameTextBox.Text + ".xml";
             var name = FilenameTextBox.Text;
 

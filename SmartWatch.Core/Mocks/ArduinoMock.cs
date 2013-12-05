@@ -33,21 +33,18 @@ namespace SmartWatch.Core.Mocks
                 new TimePointF(150, 2, 63521667005116)
             };
 
-            //var l = 30;
-
-            //for (var i = 0; i < l; i++)
-            //{
-            //    if (i == 5 || i == 15)
-            //        OnTapped(true);
-
-            //    var tpf = new TimePointF(i, 1, 10);
-            //    list.Add(tpf);
-            //}
-
-            foreach (var item in left04)
+            var incrementingList = new List<TimePointF>();
+            for (var i = 0; i < 150; i++)
+                incrementingList.Add(new TimePointF(i, 1, 1));
+            
+            while (true)
             {
-                OnDataRecieved(new List<TimePointF> {item, item, item});
-                Thread.Sleep(500);
+                foreach (var item in incrementingList)
+                {
+                    OnDataRecieved(new List<TimePointF> { item, item, item });
+                    Thread.Sleep(10);
+                }
+                incrementingList.Reverse();
             }
         }
 

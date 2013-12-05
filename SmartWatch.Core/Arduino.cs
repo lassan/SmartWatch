@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO.Ports;
+using System.Threading;
 using WobbrockLib;
 using WobbrockLib.Extensions;
 
@@ -11,8 +11,7 @@ namespace SmartWatch.Core
     public class Arduino : IArduino
     {
         #region Data Model
-
-        private readonly SerialPort _serialPort;
+        SerialPort _serialPort;
 
         #endregion
 
@@ -24,12 +23,60 @@ namespace SmartWatch.Core
             {
                 PortName = portName,
                 BaudRate = 19200,
-                Handshake = Handshake.None,
                 ReadTimeout = 500
-                //ReadBufferSize = 12
             };
 
-            _serialPort.DataReceived += _serialPort_DataReceived;
+            var thread = new Thread(ReadDataFromSerialPort) { IsBackground = true, Name = "SerialDataRecieverThread" };
+            _serialPort.Open();
+            thread.Start();
+
+        }
+
+        private void ReadDataFromSerialPort()
+        {
+            while (true)
+            {
+                var data = String.Empty;
+                int tapped;
+                int proximity1 = 0;
+                int proximity2 = 0;
+                int proximity3 = 0;
+                bool exception = false;
+                try
+                {
+                    var serialPort = _serialPort;
+                    data = serialPort.ReadLine();
+
+                    var array = data.Split('|');
+
+                    if (array.Length != 4)
+                        return;
+
+                    tapped = Int32.Parse(array[0]);
+                    proximity1 = Int32.Parse(array[1]);
+                    proximity2 = Int32.Parse(array[2]);
+                    proximity3 = Int32.Parse(array[3]);
+                }
+                catch (Exception)
+                {
+                    exception = true;
+                    Debug.Write("Invalid data:\t");
+                    Debug.WriteLine(data);
+                }
+                //if (tapped == 1 && IsEnabled == false)
+                //{
+                //    IsEnabled = true;
+                //    OnTapped(true);
+                //}
+                if (!exception)
+                {
+                    var tpf1 = new TimePointF(proximity1, 1, TimeEx.NowMs);
+                    var tpf2 = new TimePointF(proximity2, 2, TimeEx.NowMs);
+                    var tpf3 = new TimePointF(proximity3, 2, TimeEx.NowMs);
+
+                    OnDataRecieved(new List<TimePointF> { tpf1, tpf2, tpf3 });
+                }
+            }
         }
 
         #endregion
@@ -42,42 +89,44 @@ namespace SmartWatch.Core
         private void _serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             var data = String.Empty;
+            int tapped;
+            int proximity1 = 0;
+            int proximity2 = 0;
+            int proximity3 = 0;
+            bool exception = false;
             try
             {
-
-                var serialPort = (SerialPort) sender;
+                var serialPort = (SerialPort)sender;
                 data = serialPort.ReadLine();
-
-                Debug.WriteLine(data);
 
                 var array = data.Split('|');
 
                 if (array.Length != 4)
                     return;
 
-                var tapped = Int32.Parse(array[0]);
-                var proximity1 = Int32.Parse(array[1]);
-                var proximity2 = Int32.Parse(array[2]);
-                var proximity3 = Int32.Parse(array[3]);
-
-
-                //if (tapped == 1 && IsEnabled == false)
-                //{
-                //    IsEnabled = true;
-                //    OnTapped(true);
-                //}
-
+                tapped = Int32.Parse(array[0]);
+                proximity1 = Int32.Parse(array[1]);
+                proximity2 = Int32.Parse(array[2]);
+                proximity3 = Int32.Parse(array[3]);
+            }
+            catch (Exception)
+            {
+                exception = true;
+                Debug.Write("Invalid data:\t");
+                Debug.WriteLine(data);
+            }
+            //if (tapped == 1 && IsEnabled == false)
+            //{
+            //    IsEnabled = true;
+            //    OnTapped(true);
+            //}
+            if (!exception)
+            {
                 var tpf1 = new TimePointF(proximity1, 1, TimeEx.NowMs);
                 var tpf2 = new TimePointF(proximity2, 2, TimeEx.NowMs);
                 var tpf3 = new TimePointF(proximity3, 2, TimeEx.NowMs);
 
-                OnDataRecieved(new List<TimePointF> {tpf1, tpf2, tpf3});
-            }
-            catch (Exception)
-            {
-                Debug.Write("Invalid data:\t");
-                Debug.WriteLine(data);
-
+                OnDataRecieved(new List<TimePointF> { tpf1, tpf2, tpf3 });
             }
         }
 
@@ -88,7 +137,7 @@ namespace SmartWatch.Core
             else if (val > 5000)
                 val = 5000;
 
-            return val/20 - 100;
+            return val / 20 - 100;
         }
 
         #region IArudino Members
@@ -101,7 +150,6 @@ namespace SmartWatch.Core
 
         public void Connect()
         {
-            _serialPort.Open();
         }
 
         #endregion
@@ -121,15 +169,6 @@ namespace SmartWatch.Core
         {
             var handler = TapRecieved;
             if (handler != null) handler(this, e);
-        }
-
-        #endregion
-
-        #region IDisposable members
-
-        public void Dispose()
-        {
-            _serialPort.Close();
         }
 
         #endregion

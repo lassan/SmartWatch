@@ -31,12 +31,11 @@ namespace SmartWatch.Core.ProximitySensors
 
             LoadGestures();
 
-            _arduino = new Arduino("COM4");
+            _arduino = new Arduino("COM3");
             //_arduino = new ArduinoMock();
             _arduino.DataRecieved += arduino_DataRecievedIntoQueue;
 
             //_arduino.TapRecieved += arduino_TapRecieved;
-            _arduino.Connect();
         }
 
         /// <summary>

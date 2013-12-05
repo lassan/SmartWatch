@@ -53,7 +53,6 @@ namespace SmartWatch.Visualiser
 
         public ViewModel(IArduino arduino)
         {
-            arduino.Connect();
             arduino.DataRecieved += ArduinoDataRecievedHandler;
         }
 

@@ -1,6 +1,6 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using SmartWatch.Core;
-using SmartWatch.Core.Mocks;
 
 namespace SmartWatch.Visualiser
 {
@@ -9,13 +9,13 @@ namespace SmartWatch.Visualiser
     /// </summary>
     public partial class MainWindow : Window
     {
-
         public MainWindow()
         {
-            var arduino = new ArduinoMock();
-            //var arduino = new Arduino("COM3");
+            //var arduino = new ArduinoMock();
+            var arduino = new Arduino("COM3");
             ViewModel = new ViewModel(arduino);
             InitializeComponent();
+            Console.ReadLine();
         }
 
         public ViewModel ViewModel { get; set; }

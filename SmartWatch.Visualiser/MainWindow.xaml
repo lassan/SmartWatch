@@ -22,9 +22,14 @@
             </Style>
 
             <visualiser:ProximityToHeight x:Key="ProximityToHeight" 
-                                          MaxProximity="150" 
+                                          MaxProximity="100" 
                                           Margin="100"/>
 
+            <Style TargetType="StackPanel" x:Key="SensorBarStyle">
+                <Setter Property="Orientation" Value="Vertical"></Setter>
+                <Setter Property="VerticalAlignment" Value="Bottom"></Setter>
+                <Setter Property="HorizontalAlignment" Value="Center"></Setter>
+            </Style>
         </Grid.Resources>
 
         <StackPanel Orientation="Horizontal"
@@ -32,7 +37,7 @@
                     HorizontalAlignment="Left">
 
             <!-- Sensor 1 -->
-            <StackPanel>
+            <StackPanel Style="{StaticResource SensorBarStyle}">
                 <Rectangle>
                     <Rectangle.Height>
                         <MultiBinding Converter="{StaticResource ProximityToHeight}">
@@ -45,7 +50,7 @@
             </StackPanel>
 
             <!-- Sensor 2 -->
-            <StackPanel>
+            <StackPanel Style="{StaticResource SensorBarStyle}">
                 <Rectangle>
                     <Rectangle.Height>
                         <MultiBinding Converter="{StaticResource ProximityToHeight}">
@@ -58,7 +63,7 @@
             </StackPanel>
 
             <!-- Sensor 3 -->
-            <StackPanel>
+            <StackPanel Style="{StaticResource SensorBarStyle}">
                 <Rectangle>
                     <Rectangle.Height>
                         <MultiBinding Converter="{StaticResource ProximityToHeight}">
