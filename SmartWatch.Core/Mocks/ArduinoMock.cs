@@ -47,7 +47,7 @@ namespace SmartWatch.Core.Mocks
             foreach (var item in left04)
             {
                 OnDataRecieved(new List<TimePointF> {item, item, item});
-                Thread.Sleep(100);
+                Thread.Sleep(500);
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO.Ports;
 using WobbrockLib;
@@ -40,45 +41,44 @@ namespace SmartWatch.Core
         /// <param name="e"></param>
         private void _serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            var serialPort = (SerialPort) sender;
-
-            string data = String.Empty;
-
+            var data = String.Empty;
             try
             {
+
+                var serialPort = (SerialPort) sender;
                 data = serialPort.ReadLine();
-                //Debug.Write(data);
+
+                Debug.WriteLine(data);
+
+                var array = data.Split('|');
+
+                if (array.Length != 4)
+                    return;
+
+                var tapped = Int32.Parse(array[0]);
+                var proximity1 = Int32.Parse(array[1]);
+                var proximity2 = Int32.Parse(array[2]);
+                var proximity3 = Int32.Parse(array[3]);
+
+
+                //if (tapped == 1 && IsEnabled == false)
+                //{
+                //    IsEnabled = true;
+                //    OnTapped(true);
+                //}
+
+                var tpf1 = new TimePointF(proximity1, 1, TimeEx.NowMs);
+                var tpf2 = new TimePointF(proximity2, 2, TimeEx.NowMs);
+                var tpf3 = new TimePointF(proximity3, 2, TimeEx.NowMs);
+
+                OnDataRecieved(new List<TimePointF> {tpf1, tpf2, tpf3});
             }
             catch (Exception)
             {
-                Debug.Write("Invalid data:\t ");
+                Debug.Write("Invalid data:\t");
                 Debug.WriteLine(data);
-                return;
+
             }
-
-            string[] array = data.Split('|');
-
-            if (array.Length != 4)
-                return;
-
-
-            int tapped = Int32.Parse(array[0]);
-            int proximity1 = Int32.Parse(array[1]);
-            int proximity2 = Int32.Parse(array[2]);
-            int proximity3 = Int32.Parse(array[3]);
-
-
-            //if (tapped == 1 && IsEnabled == false)
-            //{
-            //    IsEnabled = true;
-            //    OnTapped(true);
-            //}
-
-            var tpf1 = new TimePointF(proximity1, 1, TimeEx.NowMs);
-            var tpf2 = new TimePointF(proximity2, 2, TimeEx.NowMs);
-            var tpf3 = new TimePointF(proximity3, 2, TimeEx.NowMs);
-
-            OnDataRecieved(new List<TimePointF> {tpf1, tpf2, tpf3});
         }
 
         private int MapProximity(int val)
@@ -113,13 +113,13 @@ namespace SmartWatch.Core
         /// </summary>
         protected virtual void OnDataRecieved(List<TimePointF> e)
         {
-            EventHandler<List<TimePointF>> handler = DataRecieved;
+            var handler = DataRecieved;
             if (handler != null) handler(this, e);
         }
 
         protected virtual void OnTapped(bool e)
         {
-            EventHandler<bool> handler = TapRecieved;
+            var handler = TapRecieved;
             if (handler != null) handler(this, e);
         }
 

@@ -25,7 +25,7 @@ namespace SmartWatch.Training
             _points = new List<TimePointF>();
 
             //TODO - Remove comment for real arduino
-            _arduino = new Arduino("COM4");
+            _arduino = new Arduino("COM3");
             _arduino.DataRecieved += ArduinoDataRecieved;
 
             InitializeComponent();
