@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Timers;
+using SmartWatch.Core.Gestures;
 
 namespace SmartWatch.Core.Mocks
 {

@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using SmartWatch.Core.Gestures;
 
 namespace SmartWatch.Core.Mocks
 {
