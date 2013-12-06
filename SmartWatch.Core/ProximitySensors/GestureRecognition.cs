@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Recognizer.Dollar;
 using SmartWatch.Core.Gestures;
 using WobbrockLib;
@@ -21,6 +22,7 @@ namespace SmartWatch.Core.ProximitySensors
         private Queue<TimePointF> _queue;
         private Zoom _previousZoom;
         private int _counter = 0;
+        private int result = 1;
 
         public GestureRecognition()
         {
@@ -31,7 +33,7 @@ namespace SmartWatch.Core.ProximitySensors
 
             LoadGestures();
 
-            _arduino = new Arduino("COM3");
+            _arduino = new Arduino("COM4");
             _arduino.DataRecieved += ArduinoDataRecievedGradientDetection;
             //_arduino.DataRecieved += ArduinoDataRecievedDollarRecognizer;
         }
@@ -82,34 +84,35 @@ namespace SmartWatch.Core.ProximitySensors
             {
                 //if (_previousZoom != (Zoom) e[3].X)
                 //{
-                    _previousZoom = (Zoom) e[3].X;
-                
-                
-                    if ((int) e[3].X == (int) Zoom.In)
-                    {
-                        _list = new List<TimePointF>();
-                        OnPinchIn(new PinchParameters(new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0)));
-                        Debug.WriteLine("Zoom in");
-                        _counter = 20;
-                        _pause = 20;
-                        return;
-                    }
+                _previousZoom = (Zoom)e[3].X;
 
-                    if ((int) e[3].X == (int) Zoom.Out)
-                    {
-                        _list = new List<TimePointF>();
-                        OnPinchOut(new PinchParameters(new Point(0, 0), new Point(0, 0), new Point(0, 0),
-                            new Point(0, 0)));
-                        Debug.WriteLine("Zoom out");
-                        _counter = 20;
-                        _pause = 20;
-                        return;
-                    }
+
+                if ((int)e[3].X == (int)Zoom.In)
+                {
+                    _list = new List<TimePointF>();
+                    OnPinchIn(new PinchParameters(new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0)));
+                    Debug.WriteLine("Zoom in");
+                    _counter = 20;
+                    _pause = 20;
+                    return;
+                }
+
+                if ((int)e[3].X == (int)Zoom.Out)
+                {
+                    _list = new List<TimePointF>();
+                    OnPinchOut(new PinchParameters(new Point(0, 0), new Point(0, 0), new Point(0, 0),
+                        new Point(0, 0)));
+                    Debug.WriteLine("Zoom out");
+                    _counter = 20;
+                    _pause = 20;
+                    return;
+                }
                 //}
             }
             else
             {
-                _counter --;
+                _counter--;
+                _pause--;
             }
             
             
@@ -124,10 +127,10 @@ namespace SmartWatch.Core.ProximitySensors
             }
             //Debug.Write("");
 
-            if (_list.Any(item => (int) item.X == (int) largest.X))
-            {
-                return;
-            }
+            //if (_list.Any(item => (int) item.X == (int) largest.X))
+            //{
+            //    return;
+            //}
 
             if (_pause == 0)
                 _list.Add(largest);
@@ -146,53 +149,80 @@ namespace SmartWatch.Core.ProximitySensors
 
             foreach (var item in _list)
             {
-                xList.Add((int) item.X);
-                yList.Add((int) item.Y);
+                xList.Add((int)item.X);
+                //yList.Add((int)item.Y);
+                //Debug.Write(item.X);
+                //Debug.Write(" ");
+
+                if (item.Y != 50 && result == 1)
+                {
+                    result = 0;
+                    yList.Add((int)item.Y);
+                    //Debug.Write(item.Y);
+                    //Debug.Write(" ");
+                }
+                else if (result == 0)
+                {
+                    yList.Add((int)item.Y);
+                    //Debug.Write(item.Y);
+                    //Debug.Write(" ");
+                }
             }
+            //Debug.WriteLine("------------------------------");
 
             var filtered_list = process(xList);
             var filtered_list_y = process(yList);
 
 
             int temp = 0;
-            foreach (var item in yList)
-            {
-                if (item == 0)
-                {
-                    temp++;
-                }
-            }
+            //foreach (var item in yList)
+            //{
+            //    if (item == 0)
+            //    {
+            //        temp++;
+            //    }
+            //}
 
             //Debug.WriteLine("sensor 0: " + temp);
 
             //temp = 0;
-            foreach (var item in yList)
-            {
-                if (item == 50)
-                {
-                    temp++;
-                }
-            }
+            //foreach (var item in yList)
+            //{
+            //    if (item == 50)
+            //    {
+            //        temp++;
+            //    }
+            //}
 
             //Debug.WriteLine("sensor 1: " + temp);
 
             //temp = 0;
-            foreach (var item in yList)
-            {
-                if (item == 100)
-                {
-                    temp++;
-                }
-            }
+            //foreach (var item in yList)
+            //{
+            //    if (item == 100)
+            //    {
+            //        temp++;
+            //    }
+            //}
+
+            //Debug.WriteLine(temp);
 
             //Debug.WriteLine("sensor 2: " + temp);
 
             
             // every time theres a new data, it tries to do a detection
-            var result = 0;
-            if (temp < 6)
+            temp = 2;
+
+            if (xList.Count > 2)
             {
-                if (filtered_list_y.Count > 0 && _pause == 0)
+                temp = xList.Max() - xList.Min();
+            }
+
+            //Debug.WriteLine(temp);
+
+            if (temp < 15)
+            {
+                if (filtered_list_y.Count > 10 && _pause == 0)
                 {
                     var index = 0;
 
@@ -210,7 +240,7 @@ namespace SmartWatch.Core.ProximitySensors
             else
             {
 
-                if (filtered_list.Count > 0 && _pause == 0)
+                if (filtered_list.Count > 10 && _pause == 0)
                 {
                     var index = 0;
 
@@ -231,9 +261,6 @@ namespace SmartWatch.Core.ProximitySensors
 
         private int Detect_y(List<int> list, List<int> gradient)
         {
-            int min = 0;
-            int max = 100;
-
             int pos = 0;
             int neg = 0;
             int result = 0;
@@ -283,18 +310,6 @@ namespace SmartWatch.Core.ProximitySensors
 
         private int Detect(List<int> list, List<int> gradient)
         {
-            int min = 0;
-            int max = 100;
-
-            // gesture is only valid if the hand is moving half of the maximun distance
-            int valid_dist = (max - min)/2;
-
-            if (list.Max() - list.Min() < valid_dist)
-            {
-                // Debug.WriteLine("quiting");
-                return 0;
-            }
-
             int pos = 0;
             int neg = 0;
             int count = 0;
@@ -328,13 +343,13 @@ namespace SmartWatch.Core.ProximitySensors
             }
 
             //if (sum > 0 && count > 6)
-            if (pos > neg && count > 8)
+            if (pos > neg && count > 6)
             {
                 Debug.WriteLine("LEFT");
                 OnScrollHorizontal(new ScrollParameters(new Point(0, 0), new Point(10, 0)));
             }
             //else if (sum < 0 && count > 6)
-            else if (neg > pos && count > 8)
+            else if (neg > pos && count > 6)
             {
                 Debug.WriteLine(("RIGHT"));
                 OnScrollHorizontal(new ScrollParameters(new Point(10, 0), new Point(0, 0)));
