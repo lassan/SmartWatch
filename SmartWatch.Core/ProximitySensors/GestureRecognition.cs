@@ -30,7 +30,7 @@ namespace SmartWatch.Core.ProximitySensors
 
             LoadGestures();
 
-            _arduino = new Arduino("COM3");
+            _arduino = new Arduino("COM4");
             _arduino.DataRecieved += ArduinoDataRecievedGradientDetection;
             //_arduino.DataRecieved += ArduinoDataRecievedDollarRecognizer;
         }
@@ -119,42 +119,78 @@ namespace SmartWatch.Core.ProximitySensors
             var filtered_list_y = process(yList);
 
 
-            // every time theres a new data, it tries to do a detection
-            var result = 0;
-
-            if (filtered_list_y.Count > 0 && _pause == 0)
+            int temp = 0;
+            foreach (var item in yList)
             {
-                var index = 0;
-
-                if (yList.Count != 0)
-                    result = Detect_y(yList, filtered_list_y);
-
-                if (result == 1)
+                if (item == 0)
                 {
-                    _pause = 8;
-
-                    _list = new List<TimePointF>();
+                    temp++;
                 }
             }
 
+            //Debug.WriteLine("sensor 0: " + temp);
 
-            //var result = 0;
+            //temp = 0;
+            foreach (var item in yList)
+            {
+                if (item == 50)
+                {
+                    temp++;
+                }
+            }
 
-            //if (filtered_list.Count > 0 && pause == 0)
-            //{
-            //    var index = 0;
+            //Debug.WriteLine("sensor 1: " + temp);
 
-            //    if (xList.Count != 0)
-            //        result = Detect(xList, filtered_list);
+            //temp = 0;
+            foreach (var item in yList)
+            {
+                if (item == 100)
+                {
+                    temp++;
+                }
+            }
 
-            //    if (result == 1)
-            //    {
+            //Debug.WriteLine("sensor 2: " + temp);
 
-            //        pause = 8;
+            
+            // every time theres a new data, it tries to do a detection
+            var result = 0;
+            if (temp < 6)
+            {
+                if (filtered_list_y.Count > 0 && _pause == 0)
+                {
+                    var index = 0;
 
-            //        _list = new List<TimePointF>();
-            //    }
-            //}
+                    if (yList.Count != 0)
+                        result = Detect_y(yList, filtered_list_y);
+
+                    if (result == 1)
+                    {
+                        _pause = 20;
+
+                        _list = new List<TimePointF>();
+                    }
+                }
+            }
+            else
+            {
+
+                if (filtered_list.Count > 0 && _pause == 0)
+                {
+                    var index = 0;
+
+                    if (xList.Count != 0)
+                        result = Detect(xList, filtered_list);
+
+                    if (result == 1)
+                    {
+
+                        _pause = 20;
+
+                        _list = new List<TimePointF>();
+                    }
+                }
+            }
         }
 
 
@@ -162,15 +198,6 @@ namespace SmartWatch.Core.ProximitySensors
         {
             int min = 0;
             int max = 100;
-
-            // gesture is only valid if the hand is moving half of the maximun distance
-            int valid_dist = (max - min)/2;
-
-            if (list.Max() - list.Min() < valid_dist)
-            {
-                // Debug.WriteLine("quiting");
-                return 0;
-            }
 
             int pos = 0;
             int neg = 0;
@@ -236,6 +263,7 @@ namespace SmartWatch.Core.ProximitySensors
             int pos = 0;
             int neg = 0;
             int count = 0;
+            int sum = 0;
 
             foreach (var item in gradient)
             {
@@ -243,6 +271,7 @@ namespace SmartWatch.Core.ProximitySensors
                 {
                     pos = 0;
                     neg = 0;
+                    sum = 0;
                     count = 0;
                 }
                     //else if (item < -10)
@@ -253,19 +282,23 @@ namespace SmartWatch.Core.ProximitySensors
                 {
                     pos++;
                     count++;
+                    sum = sum + item;
                 }
                 else if (item < 0)
                 {
                     neg++;
                     count++;
+                    sum = sum + item;
                 }
             }
 
+            //if (sum > 0 && count > 6)
             if (pos > neg && count > 8)
             {
                 Debug.WriteLine("LEFT");
                 OnScrollHorizontal(new ScrollParameters(new Point(0, 0), new Point(10, 0)));
             }
+            //else if (sum < 0 && count > 6)
             else if (neg > pos && count > 8)
             {
                 Debug.WriteLine(("RIGHT"));
