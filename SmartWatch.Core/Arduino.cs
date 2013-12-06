@@ -28,10 +28,10 @@ namespace SmartWatch.Core
                 ReadTimeout = 500
             };
 
-            _serialPort.DataReceived += DataRecievedEventHandler;
-            //var thread = new Thread(ReadDataFromSerialPort) {Priority = ThreadPriority.Normal, Name = "SerialDataRecieverThread" };
+            //_serialPort.DataReceived += DataRecievedEventHandler;
+            var thread = new Thread(ReadDataFromSerialPort) { Priority = ThreadPriority.Normal, Name = "SerialDataRecieverThread" };
             _serialPort.Open();
-            //thread.Start();
+            thread.Start();
 
         }
 
@@ -46,11 +46,11 @@ namespace SmartWatch.Core
         {
             while (true)
             {
-                if (ProcessIncomingData(_serialPort)) return;
+                ProcessIncomingData(_serialPort);
             }
         }
 
-        private bool ProcessIncomingData(SerialPort serialPort)
+        private void ProcessIncomingData(SerialPort serialPort)
         {
             var data = String.Empty;
             int tapped;
@@ -62,24 +62,16 @@ namespace SmartWatch.Core
             try
             {
                 data = serialPort.ReadLine();
-                Debug.Write(data);
                 var array = data.Split('|');
                 
-                if (array.Length != 4)
-                    return true;
+                if (array.Length != 5)
+                    return;
 
                 tapped = Int32.Parse(array[0]);
                 proximity1 = Int32.Parse(array[1]);
                 proximity2 = Int32.Parse(array[2]);
                 proximity3 = Int32.Parse(array[3]);
-                //zoom = Int32.Parse(array[4]);
-                //Debug.Write(proximity1);
-                //Debug.Write("\t");
-                //Debug.Write(proximity2);
-                //Debug.Write("\t");
-                //Debug.Write(proximity3);
-                //Debug.Write("\t");
-                //Debug.WriteLine("");
+                zoom = Int32.Parse(array[4]);
             }
             catch (TimeoutException ex)
             {
@@ -91,21 +83,15 @@ namespace SmartWatch.Core
                 Debug.Write("Invalid data:\t");
                 Debug.WriteLine(data);
             }
-            //if (tapped == 1 && IsEnabled == false)
-            //{
-            //    IsEnabled = true;
-            //    OnTapped(true);
-            //}
             if (!exception)
             {
                 var tpf1 = new TimePointF(proximity1, 0, TimeEx.NowMs);
                 var tpf2 = new TimePointF(proximity2, 50, TimeEx.NowMs);
                 var tpf3 = new TimePointF(proximity3, 100, TimeEx.NowMs);
-                //var zoomtpf = new TimePointF(zoom, 0, TimeEx.NowMs);
+                var zoomtpf = new TimePointF(zoom, 0, TimeEx.NowMs);
 
-                OnDataRecieved(new List<TimePointF> {tpf1, tpf2, tpf3});
+                OnDataRecieved(new List<TimePointF> {tpf1, tpf2, tpf3, zoomtpf});
             }
-            return false;
         }
 
         #endregion

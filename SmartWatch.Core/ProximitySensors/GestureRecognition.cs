@@ -15,11 +15,12 @@ namespace SmartWatch.Core.ProximitySensors
 
         private readonly IArduino _arduino;
         private readonly Recognizer.Dollar.Recognizer _recogniser;
-        private int _counter;
 
         private List<TimePointF> _list;
         private int _pause;
         private Queue<TimePointF> _queue;
+        private Zoom _previousZoom;
+        private int _counter = 0;
 
         public GestureRecognition()
         {
@@ -30,7 +31,7 @@ namespace SmartWatch.Core.ProximitySensors
 
             LoadGestures();
 
-            _arduino = new Arduino("COM4");
+            _arduino = new Arduino("COM3");
             _arduino.DataRecieved += ArduinoDataRecievedGradientDetection;
             //_arduino.DataRecieved += ArduinoDataRecievedDollarRecognizer;
         }
@@ -73,9 +74,43 @@ namespace SmartWatch.Core.ProximitySensors
         /// 
         /// </summary>
         /// <param name="sender"></param>
-        /// <param name="e">e[0] has tapped information, e[1-3] has information from the proximity sensors, and e[4] has zoom information</param>
+        /// <param name="e">e[0-2] has information from the proximity sensors, and e[3] has zoom information</param>
         private void ArduinoDataRecievedGradientDetection(object sender, List<TimePointF> e)
         {
+            // Test for zooming in and out
+            if (_counter == 0)
+            {
+                //if (_previousZoom != (Zoom) e[3].X)
+                //{
+                    _previousZoom = (Zoom) e[3].X;
+                
+                
+                    if ((int) e[3].X == (int) Zoom.In)
+                    {
+                        _list = new List<TimePointF>();
+                        OnPinchIn(new PinchParameters(new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0)));
+                        Debug.WriteLine("Zoom in");
+                        _counter = 20;
+                        _pause = 20;
+                        return;
+                    }
+
+                    if ((int) e[3].X == (int) Zoom.Out)
+                    {
+                        _list = new List<TimePointF>();
+                        OnPinchOut(new PinchParameters(new Point(0, 0), new Point(0, 0), new Point(0, 0),
+                            new Point(0, 0)));
+                        Debug.WriteLine("Zoom out");
+                        _counter = 20;
+                        _pause = 20;
+                        return;
+                    }
+                //}
+            }
+            else
+            {
+                _counter --;
+            }
             
             
 
@@ -230,12 +265,12 @@ namespace SmartWatch.Core.ProximitySensors
             if (result > 0)
             {
                 Debug.WriteLine("DOWN");
-                OnScrollHorizontal(new ScrollParameters(new Point(0, 0), new Point(10, 0)));
+                OnScrollHorizontal(new ScrollParameters(new Point(0, 0), new Point(0, 10)));
             }
             else if (result < 0)
             {
                 Debug.WriteLine(("UP"));
-                OnScrollHorizontal(new ScrollParameters(new Point(10, 0), new Point(0, 0)));
+                OnScrollHorizontal(new ScrollParameters(new Point(0, 10), new Point(0, 0)));
             }
             else
             {
@@ -348,16 +383,16 @@ namespace SmartWatch.Core.ProximitySensors
                 _queue.Dequeue();
 
 
-            if (_counter == 0)
-            {
-                _queue.Enqueue(largest);
-            }
-            else
-            {
-                _counter--;
+            //if (_counter == 0)
+            //{
+            //    _queue.Enqueue(largest);
+            //}
+            //else
+            //{
+            //    _counter--;
 
-                return;
-            }
+            //    return;
+            //}
             //if (_queue.Count != 0)
             //{
             //    //var difference = Math.Abs(_queue.LastOrDefault().X - e.X);
