@@ -24,70 +24,88 @@ namespace SmartWatch.Core
             {
                 PortName = portName,
                 BaudRate = 19200,
+                Handshake = Handshake.None,
                 ReadTimeout = 500
             };
 
-            var thread = new Thread(ReadDataFromSerialPort) {Priority = ThreadPriority.Normal, Name = "SerialDataRecieverThread" };
+            _serialPort.DataReceived += DataRecievedEventHandler;
+            //var thread = new Thread(ReadDataFromSerialPort) {Priority = ThreadPriority.Normal, Name = "SerialDataRecieverThread" };
             _serialPort.Open();
-            thread.Start();
+            //thread.Start();
 
         }
+
+        private void DataRecievedEventHandler(object sender, SerialDataReceivedEventArgs e)
+        {
+            var serialPort = sender as SerialPort;
+            ProcessIncomingData(serialPort);
+        }
+
 
         private void ReadDataFromSerialPort()
         {
             while (true)
             {
-                var data = String.Empty;
-                int tapped;
-                int proximity1 = 0;
-                int proximity2 = 0;
-                int proximity3 = 0;
-                int zoom = 0;
-                bool exception = false;
-                try
-                {
-                    var serialPort = _serialPort;
-                    data = serialPort.ReadLine();
-                    var array = data.Split('|');
-
-                    if (array.Length != 4)
-                        return;
-
-                    tapped = Int32.Parse(array[0]);
-                    proximity1 = Int32.Parse(array[1]);
-                    proximity2 = Int32.Parse(array[2]);
-                    proximity3 = Int32.Parse(array[3]);
-                    zoom = Int32.Parse(array[4]);
-                    //Debug.Write(proximity1);
-                    //Debug.Write("\t");
-                    //Debug.Write(proximity2);
-                    //Debug.Write("\t");
-                    //Debug.Write(proximity3);
-                    //Debug.Write("\t");
-                    //Debug.WriteLine("");
-
-                }
-                catch (Exception)
-                {
-                    exception = true;
-                    Debug.Write("Invalid data:\t");
-                    Debug.WriteLine(data);
-                }
-                //if (tapped == 1 && IsEnabled == false)
-                //{
-                //    IsEnabled = true;
-                //    OnTapped(true);
-                //}
-                if (!exception)
-                {
-                    var tpf1 = new TimePointF(proximity1, 0, TimeEx.NowMs);
-                    var tpf2 = new TimePointF(proximity2, 50, TimeEx.NowMs);
-                    var tpf3 = new TimePointF(proximity3, 100, TimeEx.NowMs);
-                    var zoomtpf = new TimePointF(zoom, 0, TimeEx.NowMs);
-
-                    OnDataRecieved(new List<TimePointF> { tpf1, tpf2, tpf3, zoomtpf });
-                }
+                if (ProcessIncomingData(_serialPort)) return;
             }
+        }
+
+        private bool ProcessIncomingData(SerialPort serialPort)
+        {
+            var data = String.Empty;
+            int tapped;
+            int proximity1 = 0;
+            int proximity2 = 0;
+            int proximity3 = 0;
+            int zoom = 0;
+            bool exception = false;
+            try
+            {
+                data = serialPort.ReadLine();
+                Debug.Write(data);
+                var array = data.Split('|');
+                
+                if (array.Length != 4)
+                    return true;
+
+                tapped = Int32.Parse(array[0]);
+                proximity1 = Int32.Parse(array[1]);
+                proximity2 = Int32.Parse(array[2]);
+                proximity3 = Int32.Parse(array[3]);
+                //zoom = Int32.Parse(array[4]);
+                //Debug.Write(proximity1);
+                //Debug.Write("\t");
+                //Debug.Write(proximity2);
+                //Debug.Write("\t");
+                //Debug.Write(proximity3);
+                //Debug.Write("\t");
+                //Debug.WriteLine("");
+            }
+            catch (TimeoutException ex)
+            {
+                Debug.WriteLine("Timeout on the serial port");
+            }
+            catch (Exception)
+            {
+                exception = true;
+                Debug.Write("Invalid data:\t");
+                Debug.WriteLine(data);
+            }
+            //if (tapped == 1 && IsEnabled == false)
+            //{
+            //    IsEnabled = true;
+            //    OnTapped(true);
+            //}
+            if (!exception)
+            {
+                var tpf1 = new TimePointF(proximity1, 0, TimeEx.NowMs);
+                var tpf2 = new TimePointF(proximity2, 50, TimeEx.NowMs);
+                var tpf3 = new TimePointF(proximity3, 100, TimeEx.NowMs);
+                //var zoomtpf = new TimePointF(zoom, 0, TimeEx.NowMs);
+
+                OnDataRecieved(new List<TimePointF> {tpf1, tpf2, tpf3});
+            }
+            return false;
         }
 
         #endregion
