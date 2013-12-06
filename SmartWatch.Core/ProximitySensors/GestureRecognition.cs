@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Timers;
 using Recognizer.Dollar;
 using SmartWatch.Core.Gestures;
 using WobbrockLib;
@@ -16,13 +16,15 @@ namespace SmartWatch.Core.ProximitySensors
 
         private readonly IArduino _arduino;
         private readonly Recognizer.Dollar.Recognizer _recogniser;
+        private int _counter;
+        private bool _detectingScrolls = true; // if false, detecting zooms
 
         private List<TimePointF> _list;
         private int _pause;
+        private Zoom _previousZoom = Zoom.None;
         private Queue<TimePointF> _queue;
-        private Zoom _previousZoom;
-        private int _counter = 0;
-        private int result = 1;
+        private int _result = 1;
+        private bool _shouldProcessTaps = true;
 
         public GestureRecognition()
         {
@@ -33,9 +35,11 @@ namespace SmartWatch.Core.ProximitySensors
 
             LoadGestures();
 
-            _arduino = new Arduino("COM4");
-            _arduino.DataRecieved += ArduinoDataRecievedGradientDetection;
-            //_arduino.DataRecieved += ArduinoDataRecievedDollarRecognizer;
+            _arduino = new Arduino("COM3");
+
+
+            _arduino.TapRecieved += TapRecieved;
+            _arduino.DataRecieved += DetectScrolls;
         }
 
         /// <summary>
@@ -64,59 +68,77 @@ namespace SmartWatch.Core.ProximitySensors
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void arduino_TapRecieved(object sender, bool e)
+        private void TapRecieved(object sender, bool e)
         {
-            Debug.WriteLine("Starting to detect.");
+            if (_shouldProcessTaps)
+            {
+                _shouldProcessTaps = false;
+                Debug.WriteLine("Tapped");
+                _queue = new Queue<TimePointF>();
+                SetTapsProcessingTimer(5000);
+                _detectingScrolls = !_detectingScrolls;
 
-            if (e)
-                _arduino.DataRecieved += ArduinoDataRecievedGradientDetection;
+
+                if (_detectingScrolls)
+                {
+                    _arduino.DataRecieved -= DetectZoom;
+                    _arduino.DataRecieved += DetectScrolls;
+                }
+                else
+                {
+                    _arduino.DataRecieved -= DetectScrolls;
+                    _arduino.DataRecieved += DetectZoom;
+                }
+            }
         }
 
         /// <summary>
-        /// 
+        ///     Sets a timer which enables tap processing
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e">e[0-2] has information from the proximity sensors, and e[3] has zoom information</param>
-        private void ArduinoDataRecievedGradientDetection(object sender, List<TimePointF> e)
+        /// <param name="milliseconds"></param>
+        private void SetTapsProcessingTimer(int milliseconds)
+        {
+            var timer = new Timer(milliseconds);
+            timer.Elapsed += (sender, args) => _shouldProcessTaps = true;
+            timer.Enabled = true;
+        }
+
+        private void DetectZoom(object sender, List<TimePointF> e)
         {
             // Test for zooming in and out
             if (_counter == 0)
             {
-                //if (_previousZoom != (Zoom) e[3].X)
-                //{
-                _previousZoom = (Zoom)e[3].X;
-
-
-                if ((int)e[3].X == (int)Zoom.In)
+                if ((int) e[3].X == (int) Zoom.In)
                 {
                     _list = new List<TimePointF>();
                     OnPinchIn(new PinchParameters(new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0)));
                     Debug.WriteLine("Zoom in");
                     _counter = 20;
-                    _pause = 20;
                     return;
                 }
 
-                if ((int)e[3].X == (int)Zoom.Out)
+                if ((int) e[3].X == (int) Zoom.Out)
                 {
                     _list = new List<TimePointF>();
                     OnPinchOut(new PinchParameters(new Point(0, 0), new Point(0, 0), new Point(0, 0),
                         new Point(0, 0)));
                     Debug.WriteLine("Zoom out");
                     _counter = 20;
-                    _pause = 20;
-                    return;
                 }
-                //}
             }
             else
             {
                 _counter--;
-                _pause--;
             }
-            
-            
+        }
 
+        /// <summary>
+        ///     Detects whether the gesture is left or right or up or down
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e">e[0-2] has information from the proximity sensors, and e[3] has zoom information</param>
+        private void DetectScrolls(object sender, List<TimePointF> e)
+        {
             const int max = 15;
 
             var largest = e[0];
@@ -149,21 +171,21 @@ namespace SmartWatch.Core.ProximitySensors
 
             foreach (var item in _list)
             {
-                xList.Add((int)item.X);
+                xList.Add((int) item.X);
                 //yList.Add((int)item.Y);
                 //Debug.Write(item.X);
                 //Debug.Write(" ");
 
-                if (item.Y != 50 && result == 1)
+                if (item.Y != 50 && _result == 1)
                 {
-                    result = 0;
-                    yList.Add((int)item.Y);
+                    _result = 0;
+                    yList.Add((int) item.Y);
                     //Debug.Write(item.Y);
                     //Debug.Write(" ");
                 }
-                else if (result == 0)
+                else if (_result == 0)
                 {
-                    yList.Add((int)item.Y);
+                    yList.Add((int) item.Y);
                     //Debug.Write(item.Y);
                     //Debug.Write(" ");
                 }
@@ -209,7 +231,7 @@ namespace SmartWatch.Core.ProximitySensors
 
             //Debug.WriteLine("sensor 2: " + temp);
 
-            
+
             // every time theres a new data, it tries to do a detection
             temp = 2;
 
@@ -220,18 +242,22 @@ namespace SmartWatch.Core.ProximitySensors
 
             //Debug.WriteLine(temp);
 
-            if (temp < 15)
+            int _pause2 = 0;
+
+            if (temp < 12)
             {
                 if (filtered_list_y.Count > 10 && _pause == 0)
                 {
                     var index = 0;
 
                     if (yList.Count != 0)
-                        result = Detect_y(yList, filtered_list_y);
+                        _result = Detect_y(yList, filtered_list_y);
 
-                    if (result == 1)
+                    if (_result == 1)
                     {
                         _pause = 20;
+
+                        //_pause2 = 10;
 
                         _list = new List<TimePointF>();
                     }
@@ -239,23 +265,31 @@ namespace SmartWatch.Core.ProximitySensors
             }
             else
             {
-
                 if (filtered_list.Count > 10 && _pause == 0)
                 {
                     var index = 0;
 
                     if (xList.Count != 0)
-                        result = Detect(xList, filtered_list);
+                        _result = Detect(xList, filtered_list);
 
-                    if (result == 1)
+                    if (_result == 1)
                     {
-
-                        _pause = 20;
+                        _pause = 10;
 
                         _list = new List<TimePointF>();
                     }
                 }
             }
+
+            //Debug.WriteLine(result);
+
+
+            //if (_pause2 != 0 && result == 1)
+            //{
+            //    _pause2 --;
+            //}
+            //else if (_pause2 == 0 && result == 0)
+            //{
         }
 
 
@@ -348,7 +382,7 @@ namespace SmartWatch.Core.ProximitySensors
                 Debug.WriteLine("LEFT");
                 OnScrollHorizontal(new ScrollParameters(new Point(0, 0), new Point(10, 0)));
             }
-            //else if (sum < 0 && count > 6)
+                //else if (sum < 0 && count > 6)
             else if (neg > pos && count > 6)
             {
                 Debug.WriteLine(("RIGHT"));
@@ -380,104 +414,6 @@ namespace SmartWatch.Core.ProximitySensors
             }
 
             return filtered_list;
-        }
-
-
-        private void ArduinoDataRecievedDollarRecognizer(object sender, List<TimePointF> e)
-        {
-            var largest = e[0];
-            //for (var i = 1; i < e.Count; i++)
-            //{
-            //    if (e[i].X > largest.X)
-            //        largest = e[i];
-            //}
-            //Debug.Write("");
-
-
-            if (_queue.Count == QueueCapacity)
-                _queue.Dequeue();
-
-
-            //if (_counter == 0)
-            //{
-            //    _queue.Enqueue(largest);
-            //}
-            //else
-            //{
-            //    _counter--;
-
-            //    return;
-            //}
-            //if (_queue.Count != 0)
-            //{
-            //    //var difference = Math.Abs(_queue.LastOrDefault().X - e.X);
-            //    //Debug.WriteLine(difference);
-            //    //Debug.WriteLine(_queue.LastOrDefault().X);
-            //    //Debug.WriteLine(e.X);
-            //    //Debug.WriteLine("--------------------------");
-
-
-            //    //if (difference > 0)
-            //    _queue.Enqueue(largest);
-            //    //foreach (var item in _queue.ToList())
-            //    //    Debug.Write(item.X + "\t");
-            //    //Debug.WriteLine("");
-            //    //Debug.WriteLine("+++++++++++++++++++++++++");
-            //}
-            //else
-            //{
-            //    _queue.Enqueue(largest);
-            //}
-
-
-            if (_queue.Count < QueueCapacity)
-                return;
-
-
-            var diff = _queue.Max(x => x.X) - _queue.Min(x => x.X);
-
-
-            NBestList result;
-            //if (diff > 15)
-            //{
-            //Debug.WriteLine(diff);
-            result = _recogniser.Recognize(_queue.ToList(), false);
-            //}
-            //else return;
-
-
-            if (result.IsEmpty)
-                return;
-
-
-            if (!(result.Score > 0.6))
-            {
-                _queue = new Queue<TimePointF>();
-                return;
-            }
-
-
-            foreach (var item in _queue.ToList())
-                Debug.Write(item.X + "\t");
-            Debug.WriteLine("");
-
-            _counter = 50;
-
-            var output = String.Format("{0}, {1}, {2}, {3}{4}", result.Name,
-                Math.Round(result.Score, 2),
-                Math.Round(result.Distance, 2),
-                Math.Round(result.Angle, 2), (char) 176);
-
-            _queue = new Queue<TimePointF>();
-
-            Debug.WriteLine(output);
-
-            _arduino.IsEnabled = false;
-
-            //_arduino.DataRecieved -= ArduinoDataRecievedDollarRecognizer;
-
-
-            CreateGestureEvents(e[0], result);
         }
 
 

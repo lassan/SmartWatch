@@ -53,7 +53,7 @@ namespace SmartWatch.Core
         private void ProcessIncomingData(SerialPort serialPort)
         {
             var data = String.Empty;
-            int tapped;
+            int tapped = 0;
             int proximity1 = 0;
             int proximity2 = 0;
             int proximity3 = 0;
@@ -85,6 +85,9 @@ namespace SmartWatch.Core
             }
             if (!exception)
             {
+                if(tapped == 1)
+                    OnTapped(true);
+
                 var tpf1 = new TimePointF(proximity1, 0, TimeEx.NowMs);
                 var tpf2 = new TimePointF(proximity2, 50, TimeEx.NowMs);
                 var tpf3 = new TimePointF(proximity3, 100, TimeEx.NowMs);

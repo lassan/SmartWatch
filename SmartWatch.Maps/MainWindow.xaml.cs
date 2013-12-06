@@ -62,7 +62,7 @@ namespace SmartWatch.Maps
             var shouldScrolldown = e.StartPoint.y < e.EndPoint.y;
 
 
-            const int scrollDistance = 100;
+            const int scrollDistance = 250;
 
             if (shouldScrollUp)
             {
