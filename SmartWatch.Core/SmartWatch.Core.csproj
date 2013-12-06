@@ -48,7 +48,6 @@
   <ItemGroup>
     <Compile Include="Arduino\Arduino.cs" />
     <Compile Include="Gestures\GesturesEventInvocator.cs" />
-    <Compile Include="Gestures\GestureParameters.cs" />
     <Compile Include="Arduino\IArduino.cs" />
     <Compile Include="Mocks\ArduinoMock.cs" />
     <Compile Include="Mocks\ScrollGestureProviderMocks.cs" />
@@ -56,12 +55,6 @@
     <Compile Include="Gestures\IGesturesProvider.cs" />
     <Compile Include="Mocks\RandomGesturesProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Recognizer\Recognizer.csproj">
-      <Project>{10eb124d-d00a-472d-a0c6-075ee521b9bb}</Project>
-      <Name>Recognizer</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

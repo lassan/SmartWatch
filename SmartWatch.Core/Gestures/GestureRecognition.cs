@@ -9,55 +9,22 @@ namespace SmartWatch.Core.Gestures
 {
     public class GestureRecognition : GesturesEventInvocator
     {
-        private const int QueueCapacity = 25;
-
         private readonly IArduino _arduino;
-        private readonly Recognizer.Dollar.Recognizer _recogniser;
         private int _counter;
         private bool _detectingScrolls = true; // if false, detecting zooms
 
         private List<TimePointF> _list;
         private int _pause;
-        private Zoom _previousZoom = Zoom.None;
-        private Queue<TimePointF> _queue;
-        private int _result = 1;
+        private bool _result = true;
         private bool _shouldProcessTaps = true;
 
         public GestureRecognition()
         {
             _list = new List<TimePointF>();
-            _queue = new Queue<TimePointF>(QueueCapacity);
-
-            _recogniser = new Recognizer.Dollar.Recognizer();
-
-            LoadGestures();
-
+            
             _arduino = new Arduino.Arduino("COM3");
-
-
             _arduino.TapRecieved += TapRecieved;
             _arduino.DataRecieved += DetectScrolls;
-        }
-
-        /// <summary>
-        ///     Loads gesture templates from Xml files stored in "C:\InteractiveDevices\GestureXmls\"
-        ///     These are not stored in a relative directory because this is project produces a .dll, so you would either have to
-        ///     embed the xml files in the dll or copy them to projects that use this dll, neither of which I can currently be
-        ///     bothered to do
-        /// </summary>
-        private void LoadGestures()
-        {
-            string[] filePaths = Directory.GetFiles(@"C:\InteractiveDevices\GestureXmls\", "*.xml",
-                SearchOption.AllDirectories);
-
-            foreach (var path in filePaths)
-            {
-                bool success = _recogniser.LoadGesture(path);
-                if (success)
-                    Debug.WriteLine(path + " loaded successfully.");
-                else
-                    Debug.WriteLine(path + " failed to load.");
-            }
         }
 
         /// <summary>
@@ -71,10 +38,9 @@ namespace SmartWatch.Core.Gestures
             {
                 _shouldProcessTaps = false;
                 Debug.WriteLine("Tapped");
-                _queue = new Queue<TimePointF>();
+                _list = new List<TimePointF>();
                 SetTapsProcessingTimer(5000);
                 _detectingScrolls = !_detectingScrolls;
-
 
                 if (_detectingScrolls)
                 {
@@ -141,19 +107,11 @@ namespace SmartWatch.Core.Gestures
                 if (e[i].X > largest.X)
                     largest = e[i];
             }
-            //Debug.Write("");
-
-            //if (_list.Any(item => (int) item.X == (int) largest.X))
-            //{
-            //    return;
-            //}
 
             if (_pause == 0)
                 _list.Add(largest);
             else
-            {
                 _pause--;
-            }
 
             if (_list.Count > max)
             {
@@ -166,107 +124,51 @@ namespace SmartWatch.Core.Gestures
             foreach (var item in _list)
             {
                 xList.Add((int) item.X);
-                //yList.Add((int)item.Y);
-                //Debug.Write(item.X);
-                //Debug.Write(" ");
 
-                if (item.Y != 50 && _result == 1)
+                if ((int) item.Y != 50 && _result)
                 {
-                    _result = 0;
+                    _result = false;
                     yList.Add((int) item.Y);
-                    //Debug.Write(item.Y);
-                    //Debug.Write(" ");
                 }
-                else if (_result == 0)
+                else if (!_result)
                 {
                     yList.Add((int) item.Y);
-                    //Debug.Write(item.Y);
-                    //Debug.Write(" ");
                 }
             }
-            //Debug.WriteLine("------------------------------");
 
-            var filtered_list = process(xList);
-            var filtered_list_y = process(yList);
-
-
-            int temp = 0;
-            //foreach (var item in yList)
-            //{
-            //    if (item == 0)
-            //    {
-            //        temp++;
-            //    }
-            //}
-
-            //Debug.WriteLine("sensor 0: " + temp);
-
-            //temp = 0;
-            //foreach (var item in yList)
-            //{
-            //    if (item == 50)
-            //    {
-            //        temp++;
-            //    }
-            //}
-
-            //Debug.WriteLine("sensor 1: " + temp);
-
-            //temp = 0;
-            //foreach (var item in yList)
-            //{
-            //    if (item == 100)
-            //    {
-            //        temp++;
-            //    }
-            //}
-
-            //Debug.WriteLine(temp);
-
-            //Debug.WriteLine("sensor 2: " + temp);
-
+            var filteredList = Process(xList);
+            var filteredListY = Process(yList);
 
             // every time theres a new data, it tries to do a detection
-            temp = 2;
+            var temp = 2;
 
             if (xList.Count > 2)
             {
                 temp = xList.Max() - xList.Min();
             }
 
-            //Debug.WriteLine(temp);
-
-            int _pause2 = 0;
-
             if (temp < 12)
             {
-                if (filtered_list_y.Count > 10 && _pause == 0)
+                if (filteredListY.Count > 10 && _pause == 0)
                 {
-                    var index = 0;
-
                     if (yList.Count != 0)
-                        _result = Detect_y(yList, filtered_list_y);
+                        _result = DetectY(filteredListY);
 
-                    if (_result == 1)
+                    if (_result)
                     {
                         _pause = 20;
-
-                        //_pause2 = 10;
-
                         _list = new List<TimePointF>();
                     }
                 }
             }
             else
             {
-                if (filtered_list.Count > 10 && _pause == 0)
+                if (filteredList.Count > 10 && _pause == 0)
                 {
-                    var index = 0;
-
                     if (xList.Count != 0)
-                        _result = Detect(xList, filtered_list);
+                        _result = DetectX(filteredList);
 
-                    if (_result == 1)
+                    if (_result)
                     {
                         _pause = 10;
 
@@ -274,72 +176,28 @@ namespace SmartWatch.Core.Gestures
                     }
                 }
             }
-
-            //Debug.WriteLine(result);
-
-
-            //if (_pause2 != 0 && result == 1)
-            //{
-            //    _pause2 --;
-            //}
-            //else if (_pause2 == 0 && result == 0)
-            //{
         }
 
-
-        private int Detect_y(List<int> list, List<int> gradient)
+        private bool DetectY(IEnumerable<int> gradient)
         {
-            int pos = 0;
-            int neg = 0;
-            int result = 0;
-
-            foreach (var item in gradient)
-            {
-                //if (item > 20)
-                //{
-                //    pos = 0;
-                //    neg = 0;
-                //    count = 0;
-                //}
-                //else if (item < -10)
-                //{
-                //    break;
-                //}
-                if (item > 0)
-                {
-                    pos++;
-                }
-                else if (item < 0)
-                {
-                    neg++;
-                }
-
-                result = result + item;
-            }
+            var result = gradient.Aggregate(0, (current, item) => current + item);
 
             if (result > 0)
-            {
                 OnScrollDown();
-            }
             else if (result < 0)
-            {
                 OnScrollUp();
-            }
             else
-            {
-                return 0;
-            }
+                return false;
 
-            return 1;
+            return true;
         }
 
-
-        private int Detect(List<int> list, List<int> gradient)
+        private bool DetectX(IEnumerable<int> gradient)
         {
-            int pos = 0;
-            int neg = 0;
-            int count = 0;
-            int sum = 0;
+            var pos = 0;
+            var neg = 0;
+            var count = 0;
+            var sum = 0;
 
             foreach (var item in gradient)
             {
@@ -350,10 +208,6 @@ namespace SmartWatch.Core.Gestures
                     sum = 0;
                     count = 0;
                 }
-                    //else if (item < -10)
-                    //{
-                    //    break;
-                    //}
                 else if (item > 0)
                 {
                     pos++;
@@ -368,51 +222,40 @@ namespace SmartWatch.Core.Gestures
                 }
             }
 
-            //if (sum > 0 && count > 6)
             if (pos > neg && count > 6)
-            {
-                Debug.WriteLine("LEFT");
                 OnScrollLeft();
-            }
-                //else if (sum < 0 && count > 6)
-            else if (neg > pos && count > 6)
-            {
-                Debug.WriteLine(("RIGHT"));
-                OnScrollRight();
-            }
-            else
-            {
-                return 0;
-            }
 
-            return 1;
+            else if (neg > pos && count > 6)
+                OnScrollRight();
+
+            else
+                return false;
+
+            return true;
         }
 
         // apply filter to the list
         // gradient filter is applied at the moment
-        private List<int> process(List<int> list)
+        private static List<int> Process(List<int> list)
         {
-            var filtered_list = new List<int>();
+            var filteredList = new List<int>();
 
             int[] mask = {-1, 1};
 
-            int val;
-
-            for (int i = 0; i < list.Count - 1; i++)
+            for (var i = 0; i < list.Count - 1; i++)
             {
-                val = mask[0]*list[i] + mask[1]*list[i + 1];
+                var val = mask[0]*list[i] + mask[1]*list[i + 1];
 
-                filtered_list.Add(val);
+                filteredList.Add(val);
             }
 
-            return filtered_list;
+            return filteredList;
         }
 
         private enum Zoom
         {
             In = 1,
-            Out = -1,
-            None = 0
+            Out = -1
         }
     }
 }
