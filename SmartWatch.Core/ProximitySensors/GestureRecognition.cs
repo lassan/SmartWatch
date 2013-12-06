@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Timers;
 using Recognizer.Dollar;
 using SmartWatch.Core.Gestures;
 using WobbrockLib;
@@ -12,7 +13,7 @@ namespace SmartWatch.Core.ProximitySensors
 {
     public class GestureRecognition : IGestures
     {
-        private const int QueueCapacity = 15;
+        private const int QueueCapacity = 25;
 
         private const bool UsingQueue = true;
         private readonly IArduino _arduino;
@@ -21,6 +22,8 @@ namespace SmartWatch.Core.ProximitySensors
 
         private List<TimePointF> _list;
         private Queue<TimePointF> _queue;
+
+        private int Counter = 0;
 
         public GestureRecognition()
         {
@@ -33,7 +36,8 @@ namespace SmartWatch.Core.ProximitySensors
 
             _arduino = new Arduino("COM3");
             //_arduino = new ArduinoMock();
-            _arduino.DataRecieved += arduino_DataRecievedIntoQueue;
+            _arduino.DataRecieved += ArduinoDataRecievedGradientDetection;
+            //_arduino.DataRecieved += ArduinoDataRecievedDollarRecognizer;
 
             //_arduino.TapRecieved += arduino_TapRecieved;
         }
@@ -67,53 +71,30 @@ namespace SmartWatch.Core.ProximitySensors
         private void arduino_TapRecieved(object sender, bool e)
         {
             Debug.WriteLine("Starting to detect.");
-            if (e && !UsingQueue)
-                _arduino.DataRecieved += arduino_DataRecievedIntoList;
-            if (e && UsingQueue)
-                _arduino.DataRecieved += arduino_DataRecievedIntoQueue;
+          
+            if (e)
+                _arduino.DataRecieved += ArduinoDataRecievedGradientDetection;
         }
 
-        private void arduino_DataRecievedIntoList(object sender, List<TimePointF> e)
-        {
-            _list.Add(e[1]);
-            
-
-            if (_list.Count > 6)
-            {
-                NBestList result = _recogniser.Recognize(_list, false);
-
-                if (result.IsEmpty)
-                {
-                    Debug.WriteLine("Nothing recognised");
-                }
-                else
-                {
-                    string output = String.Format("{0}, {1}, {2}, {3}{4}", result.Name,
-                        Math.Round(result.Score, 2),
-                        Math.Round(result.Distance, 2),
-                        Math.Round(result.Angle, 2), (char) 176);
-
-                    Debug.WriteLine(output);
-
-                    _arduino.DataRecieved -= arduino_DataRecievedIntoList;
-                    _list = new List<TimePointF>();
-                    _arduino.IsEnabled = false;
-                    Debug.WriteLine("Detection stopped.");
-                }
-            }
-        }
-
-        private void arduino_DataRecievedIntoQueue(object sender, List<TimePointF> e)
+        private void ArduinoDataRecievedGradientDetection(object sender, List<TimePointF> e)
         {
             const int max = 15;
 
-            if (_list.Any(item => (int) item.X == (int)e[0].X))
+            var largest = e[0];
+            for (var i = 1; i < e.Count; i++)
+            {
+                if (e[i].X > largest.X)
+                    largest = e[i];
+            }
+            //Debug.Write("");
+
+            if (_list.Any(item => (int)item.X == (int)largest.X))
             {
                 return;
             }
 
             if (pause == 0)
-                _list.Add(e[0]);
+                _list.Add(largest);
             else
             {
                 pause--;
@@ -125,56 +106,121 @@ namespace SmartWatch.Core.ProximitySensors
             }
 
             var xList = new List<int>();
-            foreach(var item in _list)
+            var yList = new List<int>();
+
+            foreach (var item in _list)
+            {
                 xList.Add((int)item.X);
+                yList.Add((int)item.Y);
+            }
 
             var filtered_list = process(xList);
-
+            var filtered_list_y = process(yList);
 
 
             // every time theres a new data, it tries to do a detection
             var result = 0;
 
-            if (filtered_list.Count > 0 && pause == 0)
+            if (filtered_list_y.Count > 0 && pause == 0)
             {
                 var index = 0;
-                //if (filtered_list.Max() > 20)
-                //{
-                //    index = filtered_list.IndexOf(filtered_list.Max()) + 1;
 
-                //    _list = _list.GetRange(index, _list.Count - index);
-                //    xList = xList.GetRange(index, xList.Count - index);
-                //    filtered_list = filtered_list.GetRange(index, filtered_list.Count - index);
-                //}
-                //else if (filtered_list.Min() < -20)
-                //{
-                //    index = filtered_list.IndexOf(filtered_list.Min());
-
-                //    _list = _list.GetRange(0, index);
-                //    xList = xList.GetRange(0, index);
-                //    filtered_list = filtered_list.GetRange(0, index);
-                //}
-                if(xList.Count != 0)
-                    result = Detect(xList, filtered_list);
+                if (yList.Count != 0)
+                    result = Detect_y(yList, filtered_list_y);
 
                 if (result == 1)
                 {
-
                     pause = 8;
 
                     _list = new List<TimePointF>();
-
-                    //foreach (var item in filtered_list)
-                    //{
-                    //    Debug.Write(item);
-                    //    Debug.Write("   ");
-                    //}
-
-
-                    //Debug.WriteLine("---------------");
                 }
             }
+
+
+            //var result = 0;
+
+            //if (filtered_list.Count > 0 && pause == 0)
+            //{
+            //    var index = 0;
+
+            //    if (xList.Count != 0)
+            //        result = Detect(xList, filtered_list);
+
+            //    if (result == 1)
+            //    {
+
+            //        pause = 8;
+
+            //        _list = new List<TimePointF>();
+            //    }
+            //}
         }
+
+
+        private int Detect_y(List<int> list, List<int> gradient)
+        {
+            int min = 0;
+            int max = 100;
+
+            // gesture is only valid if the hand is moving half of the maximun distance
+            int valid_dist = (max - min) / 2;
+
+            if (list.Max() - list.Min() < valid_dist)
+            {
+                // Debug.WriteLine("quiting");
+                return 0;
+            }
+
+            int pos = 0;
+            int neg = 0;
+            int result = 0;
+
+            foreach (var item in gradient)
+            {
+                //if (item > 20)
+                //{
+                //    pos = 0;
+                //    neg = 0;
+                //    count = 0;
+                //}
+                //else if (item < -10)
+                //{
+                //    break;
+                //}
+                if (item > 0)
+                {
+                    pos++;
+                }
+                else if (item < 0)
+                {
+                    neg++;
+
+                }
+
+                result = result + item;
+            }
+
+            if (result > 0)
+            {
+                Debug.WriteLine("DOWN");
+                OnScrollHorizontal(new ScrollParameters(new Point(0, 0), new Point(10, 0)));
+
+            }
+            else if (result < 0)
+            {
+                Debug.WriteLine(("UP"));
+                OnScrollHorizontal(new ScrollParameters(new Point(10, 0), new Point(0, 0)));
+
+            }
+            else
+            {
+                return 0;
+            }
+
+            return 1;
+        }
+
+
 
         private int Detect(List<int> list, List<int> gradient)
         {
@@ -257,6 +303,108 @@ namespace SmartWatch.Core.ProximitySensors
 
             return filtered_list;
         }
+
+
+        private void ArduinoDataRecievedDollarRecognizer(object sender, List<TimePointF> e)
+        {
+
+            var largest = e[0];
+            //for (var i = 1; i < e.Count; i++)
+            //{
+            //    if (e[i].X > largest.X)
+            //        largest = e[i];
+            //}
+            //Debug.Write("");
+
+
+            if (_queue.Count == QueueCapacity)
+                _queue.Dequeue();
+
+
+            if (Counter == 0)
+            {
+                _queue.Enqueue(largest);
+            }
+            else
+            {
+                Counter--;
+
+                return;
+            }
+            //if (_queue.Count != 0)
+            //{
+            //    //var difference = Math.Abs(_queue.LastOrDefault().X - e.X);
+            //    //Debug.WriteLine(difference);
+            //    //Debug.WriteLine(_queue.LastOrDefault().X);
+            //    //Debug.WriteLine(e.X);
+            //    //Debug.WriteLine("--------------------------");
+
+
+            //    //if (difference > 0)
+            //    _queue.Enqueue(largest);
+            //    //foreach (var item in _queue.ToList())
+            //    //    Debug.Write(item.X + "\t");
+            //    //Debug.WriteLine("");
+            //    //Debug.WriteLine("+++++++++++++++++++++++++");
+            //}
+            //else
+            //{
+            //    _queue.Enqueue(largest);
+            //}
+
+
+            if (_queue.Count < QueueCapacity)
+                return;
+
+
+            var diff = _queue.Max(x => x.X) - _queue.Min(x => x.X);
+
+
+            NBestList result;
+            //if (diff > 15)
+            //{
+            //Debug.WriteLine(diff);
+            result = _recogniser.Recognize(_queue.ToList(), false);
+            //}
+            //else return;
+
+
+            if (result.IsEmpty)
+                return;
+
+
+            if (!(result.Score > 0.6))
+            {
+                _queue = new Queue<TimePointF>();
+                return;
+            }
+
+
+            foreach (var item in _queue.ToList())
+                Debug.Write(item.X + "\t");
+            Debug.WriteLine("");
+
+            Counter = 50;
+
+            var output = String.Format("{0}, {1}, {2}, {3}{4}", result.Name,
+                Math.Round(result.Score, 2),
+                Math.Round(result.Distance, 2),
+                Math.Round(result.Angle, 2), (char)176);
+
+            _queue = new Queue<TimePointF>();
+
+            Debug.WriteLine(output);
+
+            _arduino.IsEnabled = false;
+
+            //_arduino.DataRecieved -= ArduinoDataRecievedDollarRecognizer;
+
+
+
+            CreateGestureEvents(e[0], result);
+
+        }
+
 
         /// <summary>
         ///     Creates the gesture events from the detected gesture for applications to use

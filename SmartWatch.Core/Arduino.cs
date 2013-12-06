@@ -26,7 +26,7 @@ namespace SmartWatch.Core
                 ReadTimeout = 500
             };
 
-            var thread = new Thread(ReadDataFromSerialPort) { IsBackground = true, Name = "SerialDataRecieverThread" };
+            var thread = new Thread(ReadDataFromSerialPort) {Priority = ThreadPriority.Normal, Name = "SerialDataRecieverThread" };
             _serialPort.Open();
             thread.Start();
 
@@ -46,7 +46,6 @@ namespace SmartWatch.Core
                 {
                     var serialPort = _serialPort;
                     data = serialPort.ReadLine();
-
                     var array = data.Split('|');
 
                     if (array.Length != 4)
@@ -56,6 +55,14 @@ namespace SmartWatch.Core
                     proximity1 = Int32.Parse(array[1]);
                     proximity2 = Int32.Parse(array[2]);
                     proximity3 = Int32.Parse(array[3]);
+                    //Debug.Write(proximity1);
+                    //Debug.Write("\t");
+                    //Debug.Write(proximity2);
+                    //Debug.Write("\t");
+                    //Debug.Write(proximity3);
+                    //Debug.Write("\t");
+                    //Debug.WriteLine("");
+
                 }
                 catch (Exception)
                 {
@@ -70,9 +77,9 @@ namespace SmartWatch.Core
                 //}
                 if (!exception)
                 {
-                    var tpf1 = new TimePointF(proximity1, 1, TimeEx.NowMs);
-                    var tpf2 = new TimePointF(proximity2, 2, TimeEx.NowMs);
-                    var tpf3 = new TimePointF(proximity3, 2, TimeEx.NowMs);
+                    var tpf1 = new TimePointF(proximity1, 0, TimeEx.NowMs);
+                    var tpf2 = new TimePointF(proximity2, 50, TimeEx.NowMs);
+                    var tpf3 = new TimePointF(proximity3, 100, TimeEx.NowMs);
 
                     OnDataRecieved(new List<TimePointF> { tpf1, tpf2, tpf3 });
                 }

@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
-using System.Threading;
 using System.Windows;
 using System.Xml;
 using SmartWatch.Core;
-using SmartWatch.Core.Mocks;
 using WobbrockLib;
 
 namespace SmartWatch.Training
@@ -17,9 +15,10 @@ namespace SmartWatch.Training
     /// </summary>
     public partial class MainWindow : Window
     {
-        private IArduino _arduino;
+        private readonly IArduino _arduino;
+        private readonly List<TimePointF> _points;
 
-        private List<TimePointF> _points;
+        private string _trainingType;
 
         public MainWindow()
         {
@@ -27,21 +26,21 @@ namespace SmartWatch.Training
 
             //TODO - Remove comment for real arduino
             _arduino = new Arduino("COM3");
-            _arduino.DataRecieved += ArduinoDataRecieved;
 
             InitializeComponent();
         }
 
-        private void StartButtonClick(object sender, RoutedEventArgs e)
+        private void HorizontalScrollTrainingClick(object sender, RoutedEventArgs e)
         {
-            //TODO - Comment out for real arduino
-            //_arduino = new ArduinoMock();
-
             if (String.IsNullOrWhiteSpace(FilenameTextBox.Text))
             {
                 MessageBox.Show("Enter a name first");
                 return;
             }
+            _trainingType = "horizontal";
+
+            _arduino.DataRecieved += ArduinoDataRecieved;
+
 
             IsRecordingTextBlock.Visibility = Visibility.Visible;
         }
@@ -96,17 +95,64 @@ namespace SmartWatch.Training
                         writer.Close();
                 }
             }
+
+
             IsRecordingTextBlock.Visibility = Visibility.Hidden;
-            
+
             // Clear text fields to avoid overwriting files
             FilenameTextBox.Text = String.Empty;
             _points.Clear();
+            _arduino.DataRecieved -= ArduinoDataRecieved;
         }
 
 
         private void ArduinoDataRecieved(object sender, List<TimePointF> e)
         {
-            _points.Add(e[0]);
+            var largest = e[0];
+            for (var i = 1; i < e.Count; i++)
+            {
+                if (e[i].X > largest.X)
+                    largest = e[i];
+            }
+            _points.Add(largest);
+
+            //switch (_trainingType)
+            //{
+                    
+
+            //    case "vertical":
+
+            //        var largest = e[0];
+            //        for (var i = 1; i < e.Count; i++)
+            //        {
+            //            if (e[i].X > largest.X)
+            //                largest = e[i];
+            //        }
+            //        _points.Add(largest);
+
+            //        break;
+            //    case "horizontal":
+            //        _points.Add(e[1]);
+            //        break;
+            //    default:
+            //        throw new ArgumentOutOfRangeException("Invalid Training Type");
+            //}
+        }
+
+        private void VerticalScrollTrainingClick(object sender, RoutedEventArgs e)
+        {
+            if (String.IsNullOrWhiteSpace(FilenameTextBox.Text))
+            {
+                MessageBox.Show("Enter a name first");
+                return;
+            }
+
+
+            _trainingType = "vertical";
+            _arduino.DataRecieved += ArduinoDataRecieved;
+
+
+            IsRecordingTextBlock.Visibility = Visibility.Visible;
         }
     }
 }

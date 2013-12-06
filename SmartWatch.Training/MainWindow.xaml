@@ -7,9 +7,13 @@
             <TextBlock>Name:</TextBlock>
             <TextBox x:Name="FilenameTextBox" />
 
-            <Button Content="Start"
+            <Button Content ="Vertical Scroll Training"
                     Background="Green"
-                    Click="StartButtonClick" />
+                    Click="VerticalScrollTrainingClick">
+            </Button>
+            <Button Content="HorizontalScrollTraining"
+                    Background="Green"
+                    Click="HorizontalScrollTrainingClick" />
             <Button Content="Stop"
                     Background="Red"
                     Click="StopButtonClick" />
