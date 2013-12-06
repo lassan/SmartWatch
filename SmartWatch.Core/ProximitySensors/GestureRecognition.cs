@@ -1,10 +1,8 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Timers;
 using Recognizer.Dollar;
 using SmartWatch.Core.Gestures;
 using WobbrockLib;
@@ -15,15 +13,13 @@ namespace SmartWatch.Core.ProximitySensors
     {
         private const int QueueCapacity = 25;
 
-        private const bool UsingQueue = true;
         private readonly IArduino _arduino;
         private readonly Recognizer.Dollar.Recognizer _recogniser;
-        private int pause = 0;
+        private int _counter;
 
         private List<TimePointF> _list;
+        private int _pause;
         private Queue<TimePointF> _queue;
-
-        private int Counter = 0;
 
         public GestureRecognition()
         {
@@ -35,11 +31,8 @@ namespace SmartWatch.Core.ProximitySensors
             LoadGestures();
 
             _arduino = new Arduino("COM3");
-            //_arduino = new ArduinoMock();
             _arduino.DataRecieved += ArduinoDataRecievedGradientDetection;
             //_arduino.DataRecieved += ArduinoDataRecievedDollarRecognizer;
-
-            //_arduino.TapRecieved += arduino_TapRecieved;
         }
 
         /// <summary>
@@ -53,7 +46,7 @@ namespace SmartWatch.Core.ProximitySensors
             string[] filePaths = Directory.GetFiles(@"C:\InteractiveDevices\GestureXmls\", "*.xml",
                 SearchOption.AllDirectories);
 
-            foreach (string path in filePaths)
+            foreach (var path in filePaths)
             {
                 bool success = _recogniser.LoadGesture(path);
                 if (success)
@@ -71,13 +64,21 @@ namespace SmartWatch.Core.ProximitySensors
         private void arduino_TapRecieved(object sender, bool e)
         {
             Debug.WriteLine("Starting to detect.");
-          
+
             if (e)
                 _arduino.DataRecieved += ArduinoDataRecievedGradientDetection;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e">e[0] has tapped information, e[1-3] has information from the proximity sensors, and e[4] has zoom information</param>
         private void ArduinoDataRecievedGradientDetection(object sender, List<TimePointF> e)
         {
+            
+            
+
             const int max = 15;
 
             var largest = e[0];
@@ -88,16 +89,16 @@ namespace SmartWatch.Core.ProximitySensors
             }
             //Debug.Write("");
 
-            if (_list.Any(item => (int)item.X == (int)largest.X))
+            if (_list.Any(item => (int) item.X == (int) largest.X))
             {
                 return;
             }
 
-            if (pause == 0)
+            if (_pause == 0)
                 _list.Add(largest);
             else
             {
-                pause--;
+                _pause--;
             }
 
             if (_list.Count > max)
@@ -110,8 +111,8 @@ namespace SmartWatch.Core.ProximitySensors
 
             foreach (var item in _list)
             {
-                xList.Add((int)item.X);
-                yList.Add((int)item.Y);
+                xList.Add((int) item.X);
+                yList.Add((int) item.Y);
             }
 
             var filtered_list = process(xList);
@@ -121,7 +122,7 @@ namespace SmartWatch.Core.ProximitySensors
             // every time theres a new data, it tries to do a detection
             var result = 0;
 
-            if (filtered_list_y.Count > 0 && pause == 0)
+            if (filtered_list_y.Count > 0 && _pause == 0)
             {
                 var index = 0;
 
@@ -130,7 +131,7 @@ namespace SmartWatch.Core.ProximitySensors
 
                 if (result == 1)
                 {
-                    pause = 8;
+                    _pause = 8;
 
                     _list = new List<TimePointF>();
                 }
@@ -163,7 +164,7 @@ namespace SmartWatch.Core.ProximitySensors
             int max = 100;
 
             // gesture is only valid if the hand is moving half of the maximun distance
-            int valid_dist = (max - min) / 2;
+            int valid_dist = (max - min)/2;
 
             if (list.Max() - list.Min() < valid_dist)
             {
@@ -194,7 +195,6 @@ namespace SmartWatch.Core.ProximitySensors
                 else if (item < 0)
                 {
                     neg++;
-
                 }
 
                 result = result + item;
@@ -204,13 +204,11 @@ namespace SmartWatch.Core.ProximitySensors
             {
                 Debug.WriteLine("DOWN");
                 OnScrollHorizontal(new ScrollParameters(new Point(0, 0), new Point(10, 0)));
-
             }
             else if (result < 0)
             {
                 Debug.WriteLine(("UP"));
                 OnScrollHorizontal(new ScrollParameters(new Point(10, 0), new Point(0, 0)));
-
             }
             else
             {
@@ -219,7 +217,6 @@ namespace SmartWatch.Core.ProximitySensors
 
             return 1;
         }
-
 
 
         private int Detect(List<int> list, List<int> gradient)
@@ -232,7 +229,7 @@ namespace SmartWatch.Core.ProximitySensors
 
             if (list.Max() - list.Min() < valid_dist)
             {
-               // Debug.WriteLine("quiting");
+                // Debug.WriteLine("quiting");
                 return 0;
             }
 
@@ -242,16 +239,16 @@ namespace SmartWatch.Core.ProximitySensors
 
             foreach (var item in gradient)
             {
-               if (item > 20)
+                if (item > 20)
                 {
                     pos = 0;
                     neg = 0;
                     count = 0;
                 }
-                //else if (item < -10)
-                //{
-                //    break;
-                //}
+                    //else if (item < -10)
+                    //{
+                    //    break;
+                    //}
                 else if (item > 0)
                 {
                     pos++;
@@ -264,17 +261,15 @@ namespace SmartWatch.Core.ProximitySensors
                 }
             }
 
-            if (pos > neg && count >  8)
+            if (pos > neg && count > 8)
             {
                 Debug.WriteLine("LEFT");
                 OnScrollHorizontal(new ScrollParameters(new Point(0, 0), new Point(10, 0)));
-
             }
             else if (neg > pos && count > 8)
             {
                 Debug.WriteLine(("RIGHT"));
                 OnScrollHorizontal(new ScrollParameters(new Point(10, 0), new Point(0, 0)));
-
             }
             else
             {
@@ -307,7 +302,6 @@ namespace SmartWatch.Core.ProximitySensors
 
         private void ArduinoDataRecievedDollarRecognizer(object sender, List<TimePointF> e)
         {
-
             var largest = e[0];
             //for (var i = 1; i < e.Count; i++)
             //{
@@ -321,13 +315,13 @@ namespace SmartWatch.Core.ProximitySensors
                 _queue.Dequeue();
 
 
-            if (Counter == 0)
+            if (_counter == 0)
             {
                 _queue.Enqueue(largest);
             }
             else
             {
-                Counter--;
+                _counter--;
 
                 return;
             }
@@ -384,12 +378,12 @@ namespace SmartWatch.Core.ProximitySensors
                 Debug.Write(item.X + "\t");
             Debug.WriteLine("");
 
-            Counter = 50;
+            _counter = 50;
 
             var output = String.Format("{0}, {1}, {2}, {3}{4}", result.Name,
                 Math.Round(result.Score, 2),
                 Math.Round(result.Distance, 2),
-                Math.Round(result.Angle, 2), (char)176);
+                Math.Round(result.Angle, 2), (char) 176);
 
             _queue = new Queue<TimePointF>();
 
@@ -400,9 +394,7 @@ namespace SmartWatch.Core.ProximitySensors
             //_arduino.DataRecieved -= ArduinoDataRecievedDollarRecognizer;
 
 
-
             CreateGestureEvents(e[0], result);
-
         }
 
 
@@ -467,5 +459,12 @@ namespace SmartWatch.Core.ProximitySensors
         }
 
         #endregion
+
+        private enum Zoom
+        {
+            In = 1,
+            Out = -1,
+            None = 0
+        }
     }
 }

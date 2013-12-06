@@ -11,7 +11,8 @@ namespace SmartWatch.Core
     public class Arduino : IArduino
     {
         #region Data Model
-        SerialPort _serialPort;
+
+        private readonly SerialPort _serialPort;
 
         #endregion
 
@@ -41,6 +42,7 @@ namespace SmartWatch.Core
                 int proximity1 = 0;
                 int proximity2 = 0;
                 int proximity3 = 0;
+                int zoom = 0;
                 bool exception = false;
                 try
                 {
@@ -55,6 +57,7 @@ namespace SmartWatch.Core
                     proximity1 = Int32.Parse(array[1]);
                     proximity2 = Int32.Parse(array[2]);
                     proximity3 = Int32.Parse(array[3]);
+                    zoom = Int32.Parse(array[4]);
                     //Debug.Write(proximity1);
                     //Debug.Write("\t");
                     //Debug.Write(proximity2);
@@ -80,8 +83,9 @@ namespace SmartWatch.Core
                     var tpf1 = new TimePointF(proximity1, 0, TimeEx.NowMs);
                     var tpf2 = new TimePointF(proximity2, 50, TimeEx.NowMs);
                     var tpf3 = new TimePointF(proximity3, 100, TimeEx.NowMs);
+                    var zoomtpf = new TimePointF(zoom, 0, TimeEx.NowMs);
 
-                    OnDataRecieved(new List<TimePointF> { tpf1, tpf2, tpf3 });
+                    OnDataRecieved(new List<TimePointF> { tpf1, tpf2, tpf3, zoomtpf });
                 }
             }
         }
