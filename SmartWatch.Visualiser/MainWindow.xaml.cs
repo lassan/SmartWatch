@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using SmartWatch.Core;
+using SmartWatch.Core.Arduino;
 
 namespace SmartWatch.Visualiser
 {

@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Timers;
-using Recognizer.Dollar;
-using SmartWatch.Core.Gestures;
 using WobbrockLib;
 
-namespace SmartWatch.Core.ProximitySensors
+namespace SmartWatch.Core.Gestures
 {
-    public class GestureRecognition : IGestures
+    public class GestureRecognition : GesturesEventInvocator
     {
         private const int QueueCapacity = 25;
 
@@ -35,7 +32,7 @@ namespace SmartWatch.Core.ProximitySensors
 
             LoadGestures();
 
-            _arduino = new Arduino("COM3");
+            _arduino = new Arduino.Arduino("COM3");
 
 
             _arduino.TapRecieved += TapRecieved;
@@ -111,8 +108,7 @@ namespace SmartWatch.Core.ProximitySensors
                 if ((int) e[3].X == (int) Zoom.In)
                 {
                     _list = new List<TimePointF>();
-                    OnPinchIn(new PinchParameters(new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0)));
-                    Debug.WriteLine("Zoom in");
+                    OnZoomIn();
                     _counter = 20;
                     return;
                 }
@@ -120,9 +116,7 @@ namespace SmartWatch.Core.ProximitySensors
                 if ((int) e[3].X == (int) Zoom.Out)
                 {
                     _list = new List<TimePointF>();
-                    OnPinchOut(new PinchParameters(new Point(0, 0), new Point(0, 0), new Point(0, 0),
-                        new Point(0, 0)));
-                    Debug.WriteLine("Zoom out");
+                    OnZoomOut();
                     _counter = 20;
                 }
             }
@@ -325,13 +319,11 @@ namespace SmartWatch.Core.ProximitySensors
 
             if (result > 0)
             {
-                Debug.WriteLine("DOWN");
-                OnScrollHorizontal(new ScrollParameters(new Point(0, 0), new Point(0, 10)));
+                OnScrollDown();
             }
             else if (result < 0)
             {
-                Debug.WriteLine(("UP"));
-                OnScrollHorizontal(new ScrollParameters(new Point(0, 10), new Point(0, 0)));
+                OnScrollUp();
             }
             else
             {
@@ -380,13 +372,13 @@ namespace SmartWatch.Core.ProximitySensors
             if (pos > neg && count > 6)
             {
                 Debug.WriteLine("LEFT");
-                OnScrollHorizontal(new ScrollParameters(new Point(0, 0), new Point(10, 0)));
+                OnScrollLeft();
             }
                 //else if (sum < 0 && count > 6)
             else if (neg > pos && count > 6)
             {
                 Debug.WriteLine(("RIGHT"));
-                OnScrollHorizontal(new ScrollParameters(new Point(10, 0), new Point(0, 0)));
+                OnScrollRight();
             }
             else
             {
@@ -415,69 +407,6 @@ namespace SmartWatch.Core.ProximitySensors
 
             return filtered_list;
         }
-
-
-        /// <summary>
-        ///     Creates the gesture events from the detected gesture for applications to use
-        /// </summary>
-        /// <param name="e"></param>
-        /// <param name="result"></param>
-        private void CreateGestureEvents(TimePointF e, NBestList result)
-        {
-            switch (char.ToLower(result.Name[0]))
-            {
-                case 'l':
-                    OnScrollHorizontal(new ScrollParameters(new Point(0, (int) e.Y), new Point(10, (int) e.Y)));
-                    break;
-                case 'r':
-                    OnScrollHorizontal(new ScrollParameters(new Point(10, (int) e.Y), new Point(0, (int) e.Y)));
-                    break;
-            }
-        }
-
-        #region Events
-
-        public event EventHandler<PinchParameters> PinchIn;
-
-        public event EventHandler<PinchParameters> PinchOut;
-
-        public event EventHandler<ScrollParameters> ScrollHorizontal;
-
-        public event EventHandler<ScrollParameters> ScrollVertical;
-
-        public event EventHandler<ScrollParameters> ScrollDiagonal;
-
-        protected virtual void OnPinchIn(PinchParameters e)
-        {
-            EventHandler<PinchParameters> handler = PinchIn;
-            if (handler != null) handler(this, e);
-        }
-
-        protected virtual void OnPinchOut(PinchParameters e)
-        {
-            EventHandler<PinchParameters> handler = PinchOut;
-            if (handler != null) handler(this, e);
-        }
-
-        protected virtual void OnScrollHorizontal(ScrollParameters e)
-        {
-            EventHandler<ScrollParameters> handler = ScrollHorizontal;
-            if (handler != null) handler(this, e);
-        }
-
-        protected virtual void OnScrollVertical(ScrollParameters e)
-        {
-            EventHandler<ScrollParameters> handler = ScrollVertical;
-            if (handler != null) handler(this, e);
-        }
-
-        protected virtual void OnScrollDiagonal(ScrollParameters e)
-        {
-            EventHandler<ScrollParameters> handler = ScrollDiagonal;
-            if (handler != null) handler(this, e);
-        }
-
-        #endregion
 
         private enum Zoom
         {

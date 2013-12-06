@@ -6,6 +6,7 @@ using System.Text;
 using System.Windows;
 using System.Xml;
 using SmartWatch.Core;
+using SmartWatch.Core.Arduino;
 using WobbrockLib;
 
 namespace SmartWatch.Training
@@ -115,28 +116,6 @@ namespace SmartWatch.Training
                     largest = e[i];
             }
             _points.Add(largest);
-
-            //switch (_trainingType)
-            //{
-                    
-
-            //    case "vertical":
-
-            //        var largest = e[0];
-            //        for (var i = 1; i < e.Count; i++)
-            //        {
-            //            if (e[i].X > largest.X)
-            //                largest = e[i];
-            //        }
-            //        _points.Add(largest);
-
-            //        break;
-            //    case "horizontal":
-            //        _points.Add(e[1]);
-            //        break;
-            //    default:
-            //        throw new ArgumentOutOfRangeException("Invalid Training Type");
-            //}
         }
 
         private void VerticalScrollTrainingClick(object sender, RoutedEventArgs e)

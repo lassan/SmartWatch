@@ -46,13 +46,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Arduino.cs" />
+    <Compile Include="Arduino\Arduino.cs" />
+    <Compile Include="Gestures\GesturesEventInvocator.cs" />
     <Compile Include="Gestures\GestureParameters.cs" />
-    <Compile Include="IArduino.cs" />
+    <Compile Include="Arduino\IArduino.cs" />
     <Compile Include="Mocks\ArduinoMock.cs" />
-    <Compile Include="ProximitySensors\GestureRecognition.cs" />
-    <Compile Include="Gestures\IGestures.cs" />
-    <Compile Include="Mocks\RandomGestures.cs" />
+    <Compile Include="Mocks\ScrollGestureProviderMocks.cs" />
+    <Compile Include="Gestures\GestureRecognition.cs" />
+    <Compile Include="Gestures\IGesturesProvider.cs" />
+    <Compile Include="Mocks\RandomGesturesProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

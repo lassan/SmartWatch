@@ -3,9 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using Microsoft.Maps.MapControl.WPF;
-using SmartWatch.Core.Gestures;
 using SmartWatch.Core.Mocks;
-using SmartWatch.Core.ProximitySensors;
 using SmartWatch.Maps.Annotations;
 
 namespace SmartWatch.Maps
@@ -18,6 +16,8 @@ namespace SmartWatch.Maps
         #region Data Model
 
         private string _lastGesture;
+        private const int HorizontalScrollDistance = 100;
+        private const int VerticalScrollDistance = 100;
 
         public string LastGesture
         {
@@ -38,68 +38,47 @@ namespace SmartWatch.Maps
         {
             InitializeComponent();
 
-            //var gestures = new RandomGestures();
-            var gestures = new GestureRecognition();
-            gestures.PinchIn += GesturesPinchIn;
-            gestures.PinchOut += gestures_PinchOut;
-            gestures.ScrollHorizontal += gestures_ScrollHorizontal;
-            gestures.ScrollVertical += gestures_ScrollVertical;
-            gestures.ScrollDiagonal += gestures_ScrollDiagonal;
+            var gestures = new RandomGesturesProvider();
+            //var gestures = new ScrollGestureProviderMocks();
+            //var gestures = new GestureProviderRecognition();
+            gestures.ZoomIn += GesturesZoomIn;
+            gestures.ZoomOut += GesturesZoomOut;
+            gestures.ScrollLeft += GesturesScrollLeft;
+            gestures.ScrollRight += GesturesScrollRight;
+            gestures.ScrollUp += GesturesScrollUp;
+            gestures.ScrollDown += GesturesScrollDown;
         }
 
+        
         #endregion
 
         #region Gesture Handlers
 
-        private void gestures_ScrollDiagonal(object sender, ScrollParameters e)
+        private void GesturesScrollRight(object sender, EventArgs eventArgs)
         {
-            LastGesture = "Scroll Diagonal";
+            LastGesture = "Scroll Right";
+            MapControl.Dispatcher.Invoke(() => MoveHorizontally(-HorizontalScrollDistance));
         }
 
-        private void gestures_ScrollVertical(object sender, ScrollParameters e)
+        private void GesturesScrollLeft(object sender, EventArgs eventArgs)
         {
-            var shouldScrollUp = e.StartPoint.y > e.EndPoint.y;
-            var shouldScrolldown = e.StartPoint.y < e.EndPoint.y;
-
-
-            const int scrollDistance = 250;
-
-            if (shouldScrollUp)
-            {
-                LastGesture = "Scroll Up";
-
-                MapControl.Dispatcher.Invoke(() => MoveVertically(scrollDistance));
-            }
-            else if (shouldScrolldown)
-            {
-                LastGesture = "Scroll Down";
-
-                MapControl.Dispatcher.Invoke(() => MoveVertically(-scrollDistance));
-            }
+            LastGesture = "Scroll Left";
+            MapControl.Dispatcher.Invoke(() => MoveHorizontally(HorizontalScrollDistance));
         }
 
-        private void gestures_ScrollHorizontal(object sender, ScrollParameters e)
+        private void GesturesScrollDown(object sender, EventArgs e)
         {
-            var shouldScrollLeft = e.StartPoint.x < e.EndPoint.x;
-            var shouldScrollRight = e.StartPoint.x > e.EndPoint.x;
-
-            const int scrollDistance = 100;
-
-            if (shouldScrollLeft)
-            {
-                LastGesture = "Scroll Left";
-
-                MapControl.Dispatcher.Invoke(() => MoveHorizontally(scrollDistance));
-            }
-            else if (shouldScrollRight)
-            {
-                LastGesture = "Scroll Right";
-
-                MapControl.Dispatcher.Invoke(() => MoveHorizontally(-scrollDistance));
-            }
+            LastGesture = "Scroll Down";
+            MapControl.Dispatcher.Invoke(() => MoveVertically(-VerticalScrollDistance));
         }
 
-        private void GesturesPinchIn(object sender, PinchParameters e)
+        private void GesturesScrollUp(object sender, EventArgs e)
+        {
+            LastGesture = "Scroll Up";
+            MapControl.Dispatcher.Invoke(() => MoveVertically(VerticalScrollDistance));
+        }
+
+        private void GesturesZoomIn(object sender, EventArgs eventArgs)
         {
             LastGesture = "Zoom In";
 
@@ -107,7 +86,7 @@ namespace SmartWatch.Maps
             MapControl.Dispatcher.Invoke(() => ChangeZoomLevel(1));
         }
 
-        private void gestures_PinchOut(object sender, PinchParameters e)
+        private void GesturesZoomOut(object sender, EventArgs eventArgs)
         {
             LastGesture = "Zoom Out";
 
@@ -139,7 +118,7 @@ namespace SmartWatch.Maps
 
         private void MoveVertically(int change)
         {
-            var newChange = change / MapControl.ZoomLevel;
+            var newChange = change/MapControl.ZoomLevel;
 
             var location = new Location(MapControl.Center.Latitude + newChange, MapControl.Center.Longitude);
             MapControl.SetView(location, MapControl.ZoomLevel);

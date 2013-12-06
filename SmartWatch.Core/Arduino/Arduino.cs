@@ -6,7 +6,7 @@ using System.Threading;
 using WobbrockLib;
 using WobbrockLib.Extensions;
 
-namespace SmartWatch.Core
+namespace SmartWatch.Core.Arduino
 {
     public class Arduino : IArduino
     {

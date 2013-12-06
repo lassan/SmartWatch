@@ -26,25 +26,25 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Row="0" Grid.Column="0">
-                <Button Background="Red"
+                <ToggleButton Background="Red"
                         Height="{Binding ElementName=window, Path=ActualHeight, Converter={StaticResource ValueSubtractConverter}}"
                         Width="{Binding ElementName=window, Path=ActualWidth, Converter={StaticResource ValueSubtractConverter}}" />
             </StackPanel>
 
             <StackPanel Grid.Row="0" Grid.Column="1">
-                <Button Background="Green"
+                <ToggleButton Background="Green"
                         Height="{Binding ElementName=window, Path=ActualHeight, Converter={StaticResource ValueSubtractConverter}}"
                         Width="{Binding ElementName=window, Path=ActualWidth, Converter={StaticResource ValueSubtractConverter}}" />
             </StackPanel>
 
             <StackPanel Grid.Row="1" Grid.Column="0">
-                <Button Background="Blue"
+                <ToggleButton Background="Blue"
                         Height="{Binding ElementName=window, Path=ActualHeight, Converter={StaticResource ValueSubtractConverter}}"
                         Width="{Binding ElementName=window, Path=ActualWidth, Converter={StaticResource ValueSubtractConverter}}" />
             </StackPanel>
 
             <StackPanel Grid.Row="1" Grid.Column="1">
-                <Button Background="Orange"
+                <ToggleButton Background="Orange"
                         Height="{Binding ElementName=window, Path=ActualHeight, Converter={StaticResource ValueSubtractConverter}}"
                         Width="{Binding ElementName=window, Path=ActualWidth, Converter={StaticResource ValueSubtractConverter}}" />
             </StackPanel>
