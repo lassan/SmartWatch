@@ -12,7 +12,7 @@
         <m:Map Name="MapControl"
                Grid.Row="0"
                CredentialsProvider="AvB4YNvPfwD8Ti2on00oxpa38C59e5hNbANFl5SnO5RFp5QqHeASd15ghg1MzKkL"
-               AnimationLevel="Full"/>
+               AnimationLevel="None"/>
         <StackPanel Grid.Row="1">
             <TextBlock>
                 <Run Text="Last recieved gesture: " />

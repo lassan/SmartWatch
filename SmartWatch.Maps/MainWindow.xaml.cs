@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using Microsoft.Maps.MapControl.WPF;
+using SmartWatch.Core.Gestures;
 using SmartWatch.Core.Mocks;
 using SmartWatch.Maps.Annotations;
 
@@ -17,7 +18,7 @@ namespace SmartWatch.Maps
 
         private string _lastGesture;
         private const int HorizontalScrollDistance = 100;
-        private const int VerticalScrollDistance = 100;
+        private const int VerticalScrollDistance = 50;
 
         public string LastGesture
         {
@@ -38,9 +39,9 @@ namespace SmartWatch.Maps
         {
             InitializeComponent();
 
-            var gestures = new RandomGesturesProvider();
+            //var gestures = new RandomGesturesProvider();
             //var gestures = new ScrollGestureProviderMocks();
-            //var gestures = new GestureProviderRecognition();
+            var gestures = new GestureRecognition();
             gestures.ZoomIn += GesturesZoomIn;
             gestures.ZoomOut += GesturesZoomOut;
             gestures.ScrollLeft += GesturesScrollLeft;
@@ -57,13 +58,13 @@ namespace SmartWatch.Maps
         private void GesturesScrollRight(object sender, EventArgs eventArgs)
         {
             LastGesture = "Scroll Right";
-            MapControl.Dispatcher.Invoke(() => MoveHorizontally(-HorizontalScrollDistance));
+            MapControl.Dispatcher.Invoke(() => MoveHorizontally(HorizontalScrollDistance));
         }
 
         private void GesturesScrollLeft(object sender, EventArgs eventArgs)
         {
             LastGesture = "Scroll Left";
-            MapControl.Dispatcher.Invoke(() => MoveHorizontally(HorizontalScrollDistance));
+            MapControl.Dispatcher.Invoke(() => MoveHorizontally(-HorizontalScrollDistance));
         }
 
         private void GesturesScrollDown(object sender, EventArgs e)

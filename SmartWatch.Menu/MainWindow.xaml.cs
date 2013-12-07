@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Windows;
+using SmartWatch.Core.Gestures;
 using SmartWatch.Core.Mocks;
 
 namespace SmartWatch.Menu
@@ -16,8 +17,8 @@ namespace SmartWatch.Menu
         public MainWindow()
         {
             InitializeComponent();
-            var gestures = new RandomGesturesProvider();
-            //var gestures = new GestureProviderRecognition();
+            //var gestures = new RandomGesturesProvider();
+            var gestures = new GestureRecognition();
 
             gestures.ScrollRight += GesturesScrollRight;
             gestures.ScrollLeft += GesturesScrollLeft;

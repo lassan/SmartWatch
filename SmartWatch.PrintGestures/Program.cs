@@ -9,8 +9,8 @@ namespace SmartWatch.PrintGestures
     {
         private static void Main(string[] args)
         {
-            //var gestures = new GestureRecognition();
-            var gestures = new RandomGesturesProvider();
+            var gestures = new GestureRecognition();
+            //var gestures = new RandomGesturesProvider();
             gestures.ZoomIn += GesturesZoomIn;
             gestures.ZoomOut += GesturesZoomOut;
             gestures.ScrollLeft += GesturesScrollLeft;

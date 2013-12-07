@@ -39,7 +39,7 @@ namespace SmartWatch.Core.Gestures
                 _shouldProcessTaps = false;
                 Debug.WriteLine("Tapped");
                 _list = new List<TimePointF>();
-                SetTapsProcessingTimer(5000);
+                SetTapsProcessingTimer(10000);
                 _detectingScrolls = !_detectingScrolls;
 
                 if (_detectingScrolls)
@@ -120,10 +120,17 @@ namespace SmartWatch.Core.Gestures
 
             var xList = new List<int>();
             var yList = new List<int>();
+            var tempList = new List<int>();
 
             foreach (var item in _list)
             {
-                xList.Add((int) item.X);
+                tempList = xList;
+                tempList.Add((int) item.X);
+
+                if (tempList.Max() - tempList.Min() > 6)
+                {
+                    xList.Add((int) item.X);
+                }
 
                 if ((int) item.Y != 50 && _result)
                 {
@@ -140,14 +147,14 @@ namespace SmartWatch.Core.Gestures
             var filteredListY = Process(yList);
 
             // every time theres a new data, it tries to do a detection
-            var temp = 2;
+            var temp = 0;
 
-            if (xList.Count > 2)
+            if (xList.Count >= 3)
             {
                 temp = xList.Max() - xList.Min();
             }
 
-            if (temp < 12)
+            if (temp < 15)
             {
                 if (filteredListY.Count > 10 && _pause == 0)
                 {
@@ -156,7 +163,7 @@ namespace SmartWatch.Core.Gestures
 
                     if (_result)
                     {
-                        _pause = 20;
+                        _pause = 30;
                         _list = new List<TimePointF>();
                     }
                 }
@@ -170,7 +177,7 @@ namespace SmartWatch.Core.Gestures
 
                     if (_result)
                     {
-                        _pause = 10;
+                        _pause = 30;
 
                         _list = new List<TimePointF>();
                     }
@@ -201,7 +208,7 @@ namespace SmartWatch.Core.Gestures
 
             foreach (var item in gradient)
             {
-                if (item > 20)
+                if (item > 40)
                 {
                     pos = 0;
                     neg = 0;
@@ -222,10 +229,10 @@ namespace SmartWatch.Core.Gestures
                 }
             }
 
-            if (pos > neg && count > 6)
+            if (pos > neg && count > 10)
                 OnScrollLeft();
 
-            else if (neg > pos && count > 6)
+            else if (neg > pos && count > 10)
                 OnScrollRight();
 
             else

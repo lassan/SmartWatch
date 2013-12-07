@@ -13,6 +13,7 @@ namespace SmartWatch.Core.Mocks
 
         private void GenerateGestureEvents()
         {
+            Thread.Sleep(1000);
             while (true)
             {
                 OnScrollLeft();
